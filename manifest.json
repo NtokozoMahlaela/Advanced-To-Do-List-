@@ -1,0 +1,37 @@
+{
+  "name": "TaskFlow - Modern Task Management",
+  "short_name": "TaskFlow",
+  "description": "A beautiful, feature-rich task management application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMzQjgyRjYiLz4KPHBhdGggZD0iTTY0IDQ4SDEyOEMxMzYuOTcgNDggMTQ0IDU1LjAzIDE0NCA2NFYxMjhDMTQ0IDEzNi45NyAxMzYuOTcgMTQ0IDEyOCAxNDRINjRDMTU1LjAzIDE0NCAxNDggMTM2Ljk3IDE0OCAxMjhWNjRDMTQ4IDU1LjAzIDE1NS4wMyA0OCAxNjQgNDhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNODAgOEgxMTJWMTYwSDgwVjhaIiBmaWxsPSIjM0I4MkY2Ii8+CjxwYXRoIGQ9Ik05NiAzMkwxMTIgNDhMODAgNDhMMTYgOTZMMCA4MEwzMiAyNEw5NiAzMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiMzQjgyRjYiLz4KPHBhdGggZD0iTTE3MiAxMjhIMzM0QzM2NS4yIDEyOCAzODQgMTQ2LjggMzg0IDE4OFYzMjRDMzg0IDM2NS4yIDM2NS4yIDM4NCAzMzQgMzg0SDE3MkMxNDAuOCAzODQgMTIyIDM2NS4yIDEyMiAzMjRWMTg4QzEyMiAxNDYuOCAxNDAuOCAxMjggMTcyIDEyOFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMDggMTY4SDI5NlY0NDhIMjA4VjE2OFoiIGZpbGw9IiMzQjgyRjYiLz4KPHBhdGggZD0iTTI1NiA4NEwzMDQgMTMyTDIwOCAxMzJMMCAyNTZMLDQ4IDIwOEwyNTYgODRaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjU2OCIgdmlld0JveD0iMCAwIDMyMCA1NjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNTY4IiBmaWxsPSIjRkFGQUZBIi8+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNjQiIGZpbGw9IiMzQjgyRjYiLz4KPHRleHQgeD0iMTYwIiB5PSIzNSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VGFza0Zsb3c8L3RleHQ+CjxyZWN0IHg9IjIwIiB5PSI4MCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSI0MDAiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iNjAiIGN5PSIxMjAiIHI9IjgiIGZpbGw9IiMxMEI5ODEiLz4KPHJlY3QgeD0iODAiIHk9IjExMiIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNiIgcng9IjgiIGZpbGw9IiNFMkU4RjAiLz4KPGNpcmNsZSBjeD0iNjAiIGN5PSIxNjAiIHI9IjgiIGZpbGw9IiNGNTlFMEIiLz4KPHJlY3QgeD0iODAiIHk9IjE1MiIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNiIgcng9IjgiIGZpbGw9IiNFMkU4RjAiLz4KPGNpcmNsZSBjeD0iNjAiIGN5PSIyMDAiIHI9IjgiIGZpbGw9IiNFRjQ0NDQiLz4KPHJlY3QgeD0iODAiIHk9IjE5MiIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIxNiIgcng9IjgiIGZpbGw9IiNFMkU4RjAiLz4KPHJlY3QgeD0iMjAiIHk9IjI0MCIgd2lkdGg9IjI4MCIgaGVpZ2h0PSI2MCIgcng9IjgiIGZpbGw9IiNGM0Y0RjYiLz4KPC9zdmc+",
+      "sizes": "320x568",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}

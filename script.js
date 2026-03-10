@@ -1,105 +1,31 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-        // User is logged in, show app content
-        document.getElementById('authModal').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        initializeApp();
-    } else {
-        // User is not logged in, show auth modal
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('app-content').style.display = 'none';
-    }
-
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            const tab = this.dataset.tab;
-            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-            document.getElementById(`${tab}-form`).classList.add('active');
-        });
-    });
-
-    // Login form submission
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        
-        loginUser(email, password);
-    });
-
-    // Register form submission
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('register-confirm').value;
-        
-        if (password !== confirmPassword) {
-            alert('Passwords do not match!');
-            return;
-        }
-        
-        registerUser(name, email, password);
-    });
-
-    // Logout button
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        localStorage.removeItem('currentUser');
-        window.location.reload();
-    });
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Initialize advanced date picker
+    initializeDatePicker();
+    
+    // Initialize app directly without authentication
+    initializeApp();
+    initializeDarkMode();
+    initializeAdvancedFeatures();
 });
 
-function loginUser(email, password) {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.email === email && u.password === password);
+function initializeDarkMode() {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const html = document.documentElement;
     
-    if (user) {
-        // Save current user to localStorage
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        // Hide auth modal and show app content
-        document.getElementById('authModal').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
-        
-        // Initialize the app
-        initializeApp();
-    } else {
-        alert('Invalid email or password!');
+    // Check for saved dark mode preference or default to light mode
+    const currentTheme = localStorage.getItem('darkMode') || 'light';
+    if (currentTheme === 'dark') {
+        html.classList.add('dark');
     }
-}
 
-function registerUser(name, email, password) {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Check if user already exists
-    const userExists = users.some(u => u.email === email);
-    if (userExists) {
-        alert('User with this email already exists!');
-        return;
-    }
-    
-    // Create new user
-    const newUser = {
-        id: Date.now(),
-        name,
-        email,
-        password,
-        tasks: []
-    };
-    
-    // Save user
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    // Automatically login the new user
-    loginUser(email, password);
+    darkModeToggle.addEventListener('click', function() {
+        html.classList.toggle('dark');
+        const isDark = html.classList.contains('dark');
+        localStorage.setItem('darkMode', isDark ? 'dark' : 'light');
+    });
 }
 
 function initializeApp() {
@@ -119,120 +45,327 @@ function initializeApp() {
         addTask();
     });
 
-    // Filter buttons
+    // Enhanced filter buttons with animations
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            // Create ripple effect
+            createRippleEffect(this);
+            
+            // Animate active state change
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.transform = 'scale(1)';
+            });
+            
             this.classList.add('active');
+            this.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+                this.style.transition = 'transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }, 100);
+            
             filterTasks(this.dataset.filter);
+        });
+        
+        // Add hover effects
+        btn.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'scale(1.05) translateY(-2px)';
+                this.style.transition = 'transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'scale(1) translateY(0)';
+            }
         });
     });
 
-    // Background selection
+    // Background selection with enhanced animations
     document.querySelectorAll('.bg-option').forEach(option => {
         option.addEventListener('click', function() {
             const bgValue = this.dataset.bg;
-            if (bgValue === 'none') {
-                document.body.style.backgroundImage = '';
-            } else {
-                document.body.style.backgroundImage = bgValue;
-            }
+            
+            // Add ripple effect
+            createRippleEffect(this);
+            
+            // Animate background transition
+            document.body.style.transition = 'background-image 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            document.body.style.backgroundImage = bgValue;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+            document.body.style.backgroundAttachment = 'fixed';
+            document.body.style.backgroundRepeat = 'no-repeat';
             
             // Save to localStorage
             localStorage.setItem('background', bgValue);
             
-            // Update active state
+            // Update active state with animation
             document.querySelectorAll('.bg-option').forEach(opt => {
-                opt.classList.remove('active');
+                opt.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'scale-95');
+                opt.style.transform = 'scale(1)';
             });
-            this.classList.add('active');
+            this.classList.add('bg-blue-100', 'dark:bg-blue-900');
+            
+            // Pulse animation for selected option
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+                this.style.transition = 'transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }, 100);
+        });
+        
+        // Add hover effects
+        option.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('bg-blue-100') && !this.classList.contains('dark:bg-blue-900')) {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }
+        });
+        
+        option.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('bg-blue-100') && !this.classList.contains('dark:bg-blue-900')) {
+                this.style.transform = 'scale(1)';
+            }
         });
     });
 
-    // Load saved background
+    // Load saved background or set ocean background first, then shuffle
     const savedBg = localStorage.getItem('background');
-    if (savedBg) {
-        document.body.style.backgroundImage = savedBg;
-        document.querySelector(`.bg-option[data-bg="${savedBg}"]`).classList.add('active');
+    const backgrounds = [
+        "url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&h=1080')", // Ocean - always first
+        "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080')", // Mountain
+        "url('https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920&h=1080')", // Forest
+        "url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=1080')"  // Sunset
+    ];
+    
+    // Shuffle backgrounds after the first one (ocean)
+    const shuffledBackgrounds = [backgrounds[0]];
+    const remainingBackgrounds = backgrounds.slice(1);
+    for (let i = remainingBackgrounds.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [remainingBackgrounds[i], remainingBackgrounds[j]] = [remainingBackgrounds[j], remainingBackgrounds[i]];
+    }
+    shuffledBackgrounds.push(...remainingBackgrounds);
+    
+    const bgToUse = savedBg || shuffledBackgrounds[Math.floor(Math.random() * shuffledBackgrounds.length)];
+    
+    document.body.style.backgroundImage = bgToUse;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    
+    // Find and highlight the active background option
+    const activeOption = document.querySelector(`.bg-option[data-bg="${bgToUse}"]`);
+    if (activeOption) {
+        activeOption.classList.add('bg-blue-100', 'dark:bg-blue-900');
+    }
+
+    // Background menu toggle
+    const bgToggle = document.getElementById('bgToggle');
+    const bgMenu = document.getElementById('bgMenu');
+    
+    if (bgToggle && bgMenu) {
+        bgToggle.addEventListener('click', function() {
+            bgMenu.classList.toggle('hidden');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!bgToggle.contains(e.target) && !bgMenu.contains(e.target)) {
+                bgMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    // Advanced menu functionality
+    const advancedMenu = document.getElementById('advancedMenu');
+    const advancedMenuDropdown = document.getElementById('advancedMenuDropdown');
+    
+    if (advancedMenu && advancedMenuDropdown) {
+        advancedMenu.addEventListener('click', function() {
+            advancedMenuDropdown.classList.toggle('hidden');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!advancedMenu.contains(e.target) && !advancedMenuDropdown.contains(e.target)) {
+                advancedMenuDropdown.classList.add('hidden');
+            }
+        });
+    }
+
+    // Export functionality
+    document.getElementById('exportBtn').addEventListener('click', exportTasks);
+    
+    // Import functionality
+    document.getElementById('importBtn').addEventListener('click', function() {
+        document.getElementById('importFile').click();
+    });
+    
+    document.getElementById('importFile').addEventListener('change', importTasks);
+    
+    // Keyboard shortcuts modal
+    document.getElementById('keyboardShortcutsBtn').addEventListener('click', function() {
+        document.getElementById('shortcutsModal').classList.remove('hidden');
+    });
+    
+    document.getElementById('closeShortcuts').addEventListener('click', function() {
+        document.getElementById('shortcutsModal').classList.add('hidden');
+    });
+    
+    // Analytics modal
+    document.getElementById('analyticsBtn').addEventListener('click', function() {
+        showAnalytics();
+    });
+    
+    document.getElementById('analyticsQuickBtn').addEventListener('click', function() {
+        showAnalytics();
+    });
+    
+    document.getElementById('closeAnalytics').addEventListener('click', function() {
+        document.getElementById('analyticsModal').classList.add('hidden');
+    });
+    
+    document.getElementById('closeAnalyticsTop').addEventListener('click', function() {
+        document.getElementById('analyticsModal').classList.add('hidden');
+    });
+    
+    // Clear all data
+    document.getElementById('clearAllBtn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+            localStorage.clear();
+            loadTasks();
+            showNotification('All data cleared successfully!', 'success');
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + N: Add new task
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            document.getElementById('taskInput').focus();
+        }
+        
+        // Ctrl + F: Search
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        
+        // Ctrl + D: Toggle dark mode
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            document.getElementById('darkModeToggle').click();
+        }
+        
+        // Ctrl + E: Export
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            exportTasks();
+        }
+        
+        // Ctrl + I: Import
+        if (e.ctrlKey && e.key === 'i') {
+            e.preventDefault();
+            document.getElementById('importFile').click();
+        }
+        
+        // Ctrl + Shift + C: Clear completed tasks
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            clearCompletedTasks();
+        }
+        
+        // Escape: Close modals
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.fixed').forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            searchTasks(this.value);
+            updateSearchResultsCounter(this.value);
+        });
+    }
+    
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', function() {
+            searchTasks(this.value);
+            updateSearchResultsCounter(this.value);
+        });
+    }
+}
+
+function updateSearchResultsCounter(searchTerm) {
+    const mobileCounter = document.getElementById('searchResultsCounter');
+    const desktopCounter = document.getElementById('desktopSearchResultsCounter');
+    
+    if (searchTerm === '') {
+        if (mobileCounter) {
+            mobileCounter.textContent = '';
+            mobileCounter.className = 'text-xs text-gray-500';
+        }
+        if (desktopCounter) {
+            desktopCounter.textContent = '';
+            desktopCounter.className = 'text-xs text-gray-500';
+        }
+    } else {
+        const taskElements = document.querySelectorAll('.task-item:not([style*="display: none"])');
+        const visibleCount = taskElements.length;
+        
+        if (mobileCounter) {
+            mobileCounter.textContent = `${visibleCount} result${visibleCount !== 1 ? 's' : ''}`;
+            mobileCounter.className = visibleCount > 0 ? 'text-xs text-blue-600 font-medium' : 'text-xs text-gray-500';
+        }
+        if (desktopCounter) {
+            desktopCounter.textContent = `${visibleCount} result${visibleCount !== 1 ? 's' : ''}`;
+            desktopCounter.className = visibleCount > 0 ? 'text-xs text-blue-600 font-medium' : 'text-xs text-gray-500';
+        }
     }
 }
 
 function getCurrentUserTasks() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) return [];
-    
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.id === currentUser.id);
-    
-    return user ? user.tasks : [];
+    // Get tasks directly from localStorage without user authentication
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    return tasks;
 }
 
 function updateCurrentUserTasks(tasks) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) return;
-    
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
-    
-    if (userIndex !== -1) {
-        users[userIndex].tasks = tasks;
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        // Update current user in localStorage
-        localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
-    }
-}
-
-function addTask() {
-    const taskInput = document.getElementById('taskInput');
-    const descriptionInput = document.getElementById('taskDescription');
-    const dueDateInput = document.getElementById('dueDate');
-    const priorityInput = document.getElementById('priority');
-
-    if (taskInput.value.trim() === '') return;
-
-    const task = {
-        id: Date.now(),
-        text: taskInput.value.trim(),
-        description: descriptionInput.value.trim(),
-        dueDate: dueDateInput.value,
-        priority: priorityInput.value,
-        completed: false,
-        subtasks: [],
-        createdAt: new Date().toISOString()
-    };
-
-    // Get existing tasks
-    let tasks = getCurrentUserTasks();
-
-    // Add new task
-    tasks.push(task);
-
-    // Save to users
-    updateCurrentUserTasks(tasks);
-
-    // Clear form
-    taskInput.value = '';
-    descriptionInput.value = '';
-    dueDateInput.value = '';
-    priorityInput.value = 'medium';
-
-    // Reload tasks
-    loadTasks();
+    // Save tasks directly to localStorage without user authentication
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    // Add a new line here to log the updated tasks to the console
+    console.log('Updated tasks:', tasks);
 }
 
 function loadTasks() {
     const tasks = getCurrentUserTasks();
     const taskList = document.getElementById('taskList');
 
+    // ... rest of the code remains the same ...
     if (tasks.length === 0) {
         taskList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-tasks"></i>
-                <h4>No tasks yet</h4>
-                <p>Add your first task to get started</p>
+            <div class="empty-state text-center py-12">
+                <i data-lucide="inbox" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No tasks yet</h3>
+                <p class="text-gray-600 dark:text-gray-400">Add your first task to get started</p>
             </div>
         `;
+        lucide.createIcons();
+        updateStatistics([]);
         return;
     }
 
@@ -243,237 +376,244 @@ function loadTasks() {
         taskList.appendChild(taskElement);
     });
 
+    // Initialize drag and drop
+    initializeSortable();
+
     // Initialize filter
     const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
     filterTasks(activeFilter);
+
+    // Update statistics
+    updateStatistics(tasks);
+    // Re-initialize Lucide icons
+    lucide.createIcons();
 }
 
 function createTaskElement(task) {
     const now = new Date();
     const dueDate = task.dueDate ? new Date(task.dueDate) : null;
     const isOverdue = dueDate && dueDate < now && !task.completed;
+    const isBulkMode = window.isBulkMode && window.isBulkMode();
     
-    const taskElement = document.createElement('li');
-    taskElement.className = `list-group-item priority-${task.priority}`;
+    const taskElement = document.createElement('div');
+    taskElement.className = `task-item bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-5 hover:shadow-xl transition-all duration-300 cursor-move ${task.completed ? 'opacity-75' : ''} ${getPriorityClass(task.priority)}`;
     taskElement.dataset.id = task.id;
     taskElement.dataset.priority = task.priority;
     taskElement.dataset.completed = task.completed;
+    taskElement.dataset.category = task.category;
+    
+    // Add grid view class if in grid mode
+    const taskList = document.getElementById('taskList');
+    if (taskList && taskList.classList.contains('grid')) {
+        taskElement.className += ' h-full';
+    }
 
+    const priorityColors = {
+        high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        urgent: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+    };
+
+    const categoryIcons = {
+        personal: 'user',
+        work: 'briefcase',
+        shopping: 'shopping-cart',
+        health: 'heart',
+        education: 'book',
+        finance: 'dollar-sign',
+        home: 'home',
+        travel: 'plane',
+        other: 'more-horizontal'
+    };
+
+    // Calculate time remaining
+    const timeRemaining = calculateTimeRemaining(task);
+    
+    // Format tags
+    let tagsHtml = '';
+    if (task.tags && task.tags.length > 0) {
+        tagsHtml = `
+            <div class="flex flex-wrap gap-1 mt-2">
+                ${task.tags.map(tag => `
+                    <span class="inline-flex items-center px-2 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                        #${escapeHtml(tag)}
+                    </span>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // Enhanced due date display
     let dueDateHtml = '';
     if (dueDate) {
         dueDateHtml = `
-            <span class="task-due-date ${isOverdue ? 'overdue' : ''}">
-                <i class="far fa-calendar-alt"></i>
-                ${formatDate(dueDate)}
-                ${isOverdue ? ' (Overdue)' : ''}
-            </span>
+            <div class="flex items-center text-sm ${isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-gray-400'}">
+                <i data-lucide="calendar" class="w-4 h-4 mr-1"></i>
+                <span>${formatDate(dueDate)}</span>
+                <span class="ml-2 text-xs px-2 py-0.5 rounded-full ${isOverdue ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}">
+                    ${timeRemaining.text}
+                </span>
+            </div>
         `;
     }
 
+    // Enhanced description with rich text support
     let descriptionHtml = '';
     if (task.description) {
-        descriptionHtml = `<p class="text-muted small mb-2">${task.description}</p>`;
+        descriptionHtml = `<div class="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">${formatRichText(task.description)}</div>`;
     }
 
+    // Subtasks progress
     let subtasksHtml = '';
     if (task.subtasks && task.subtasks.length > 0) {
         const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+        const progressPercentage = calculateTaskProgress(task);
         subtasksHtml = `
-            <div class="subtask-progress mb-2">
-                <small class="text-muted">Subtasks: ${completedSubtasks}/${task.subtasks.length}</small>
-                <div class="progress" style="height: 5px;">
-                    <div class="progress-bar" style="width: ${(completedSubtasks / task.subtasks.length) * 100}%"></div>
+            <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
+                        <span>Subtasks: ${completedSubtasks}/${task.subtasks.length}</span>
+                    </div>
+                    <span class="text-xs font-medium text-blue-600 dark:text-blue-400">${progressPercentage}%</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                    <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercentage}%"></div>
                 </div>
             </div>
         `;
     }
 
+    // Recurring indicator
+    let recurringHtml = '';
+    if (task.recurring) {
+        recurringHtml = `
+            <div class="flex items-center text-xs text-purple-600 dark:text-purple-400 mt-2">
+                <i data-lucide="repeat" class="w-3 h-3 mr-1"></i>
+                ${task.recurringPattern || 'Recurring'}
+            </div>
+        `;
+    }
+
+    // Task metadata
+    let metadataHtml = '';
+    if (task.estimatedTime || task.complexity) {
+        metadataHtml = `
+            <div class="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center space-x-3">
+                    ${task.estimatedTime ? `
+                        <span class="flex items-center">
+                            <i data-lucide="clock" class="w-3 h-3 mr-1"></i>
+                            ${task.estimatedTime}
+                        </span>
+                    ` : ''}
+                    ${task.complexity ? `
+                        <span class="flex items-center">
+                            <i data-lucide="brain" class="w-3 h-3 mr-1"></i>
+                            ${task.complexity}
+                        </span>
+                    ` : ''}
+                </div>
+                <span class="flex items-center">
+                    <i data-lucide="calendar-plus" class="w-3 h-3 mr-1"></i>
+                    ${formatDate(new Date(task.createdAt))}
+                </span>
+            </div>
+        `;
+    }
+
+    // Enhanced task content
     taskElement.innerHTML = `
-        <div class="task-item ${task.completed ? 'completed' : ''}">
-            <div class="task-content">
-                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-                <div class="task-text">
-                    <div class="d-flex align-items-center">
-                        <span class="task-title">${task.text}</span>
-                        ${dueDateHtml}
+        <div class="flex items-start space-x-4">
+            ${isBulkMode ? `
+                <input type="checkbox" class="task-bulk-checkbox mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer" 
+                       data-task-id="${task.id}" onchange="toggleBulkSelection('${task.id}', this.checked)">
+            ` : `
+                <input type="checkbox" class="task-checkbox mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500" ${task.completed ? 'checked' : ''}>
+            `}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1 min-w-0 mr-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white ${task.completed ? 'line-through opacity-75' : ''} break-words">
+                            ${getPriorityEmoji(task.priority)} ${escapeHtml(task.text)}
+                        </h3>
                     </div>
-                    ${descriptionHtml}
-                    ${subtasksHtml}
-                </div>
-            </div>
-            <div class="task-actions">
-                <button class="btn btn-sm btn-outline-secondary add-subtask-btn">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button class="btn btn-sm btn-warning edit-task-btn">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger delete-task-btn">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-        <div class="edit-form" id="edit-form-${task.id}">
-            <form class="edit-task-form">
-                <div class="mb-2">
-                    <input type="text" class="form-control edit-task-input" value="${task.text}" placeholder="Task title" required>
-                </div>
-                <div class="mb-2">
-                    <textarea class="form-control edit-description-input" placeholder="Description">${task.description || ''}</textarea>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-6">
-                        <label>Due Date</label>
-                        <input type="datetime-local" class="form-control edit-due-date" value="${task.dueDate || ''}">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Priority</label>
-                        <select class="form-control edit-priority">
-                            <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
-                            <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
-                            <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
-                        </select>
+                    <div class="flex items-center space-x-2 flex-shrink-0">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${priorityColors[task.priority]}">
+                            ${task.priority}
+                        </span>
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">
+                            <i data-lucide="${categoryIcons[task.category]}" class="w-4 h-4 mr-1"></i>
+                            <span class="hidden sm:inline">${task.category}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary cancel-edit-btn">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn btn-sm btn-primary save-edit-btn">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
-        </div>
-        <div class="task-details collapse" id="details-${task.id}">
-            <div class="detail-item">
-                <i class="fas fa-flag detail-icon"></i>
-                <span class="text-capitalize">${task.priority} priority</span>
-            </div>
-            <div class="detail-item">
-                <i class="fas fa-calendar-plus detail-icon"></i>
-                <span>Created: ${formatDate(new Date(task.createdAt))}</span>
-            </div>
-        </div>
-        <div class="subtask-container mt-2 collapse" id="subtasks-${task.id}">
-            <ul class="subtask-list">
-                ${task.subtasks.map((subtask, index) => `
-                    <li class="subtask-item" data-index="${index}">
-                        <input type="checkbox" class="subtask-checkbox" ${subtask.completed ? 'checked' : ''}>
-                        <span class="subtask-text ${subtask.completed ? 'subtask-completed' : ''}">${subtask.text}</span>
-                        <button class="btn btn-sm btn-outline-danger delete-subtask-btn ml-2">
-                            <i class="fas fa-times"></i>
+                
+                ${descriptionHtml}
+                ${tagsHtml}
+                ${dueDateHtml}
+                ${subtasksHtml}
+                ${recurringHtml}
+                ${metadataHtml}
+                
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center space-x-1">
+                        ${task.completed ? `
+                            <span class="text-xs text-green-600 dark:text-green-400 font-medium flex items-center">
+                                <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                                Completed
+                            </span>
+                        ` : ''}
+                        ${isOverdue ? `
+                            <span class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center">
+                                <i data-lucide="alert-triangle" class="w-3 h-3 mr-1"></i>
+                                Overdue
+                            </span>
+                        ` : ''}
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button class="duplicate-task-btn p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" 
+                                title="Duplicate task" onclick="duplicateTask('${task.id}')">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
                         </button>
-                    </li>
-                `).join('')}
-            </ul>
-            <form class="add-subtask-form mt-2">
-                <input type="text" class="form-control form-control-sm subtask-input" placeholder="Add subtask">
-                <button type="submit" class="btn btn-sm btn-primary">Add</button>
-            </form>
+                        <button class="edit-task-btn p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" 
+                                title="Edit task">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button class="delete-task-btn p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" 
+                                title="Delete task">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
     // Add event listeners
     const checkbox = taskElement.querySelector('.task-checkbox');
-    checkbox.addEventListener('change', function() {
-        toggleTaskComplete(task.id, this.checked);
-    });
-
-    const deleteBtn = taskElement.querySelector('.delete-task-btn');
-    deleteBtn.addEventListener('click', function() {
-        deleteTask(task.id);
-    });
-
-    const editBtn = taskElement.querySelector('.edit-task-btn');
-    editBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const editForm = taskElement.querySelector(`#edit-form-${task.id}`);
-        editForm.classList.toggle('active');
-        
-        // Close other open forms
-        document.querySelectorAll('.edit-form').forEach(form => {
-            if (form.id !== `edit-form-${task.id}`) {
-                form.classList.remove('active');
-            }
-        });
-    });
-
-    const cancelEditBtn = taskElement.querySelector('.cancel-edit-btn');
-    cancelEditBtn.addEventListener('click', function() {
-        taskElement.querySelector(`#edit-form-${task.id}`).classList.remove('active');
-    });
-
-    const editForm = taskElement.querySelector('.edit-task-form');
-    editForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        updateTask(
-            task.id,
-            taskElement.querySelector('.edit-task-input').value,
-            taskElement.querySelector('.edit-description-input').value,
-            taskElement.querySelector('.edit-due-date').value,
-            taskElement.querySelector('.edit-priority').value
-        );
-        taskElement.querySelector(`#edit-form-${task.id}`).classList.remove('active');
-    });
-
-    const addSubtaskBtn = taskElement.querySelector('.add-subtask-btn');
-    addSubtaskBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const subtaskContainer = taskElement.querySelector(`#subtasks-${task.id}`);
-        const details = taskElement.querySelector(`#details-${task.id}`);
-        
-        // Toggle visibility
-        if (subtaskContainer.classList.contains('show')) {
-            subtaskContainer.classList.remove('show');
-            details.classList.add('show');
-        } else {
-            subtaskContainer.classList.add('show');
-            details.classList.remove('show');
-        }
-    });
-
-    // Toggle details on click
-    taskElement.querySelector('.task-text').addEventListener('click', function() {
-        const details = taskElement.querySelector(`#details-${task.id}`);
-        const subtaskContainer = taskElement.querySelector(`#subtasks-${task.id}`);
-        
-        // Toggle visibility
-        if (details.classList.contains('show')) {
-            details.classList.remove('show');
-        } else {
-            details.classList.add('show');
-            subtaskContainer.classList.remove('show');
-        }
-    });
-
-    // Subtask form
-    const subtaskForm = taskElement.querySelector('.add-subtask-form');
-    if (subtaskForm) {
-        subtaskForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const input = this.querySelector('.subtask-input');
-            if (input.value.trim() === '') return;
-            
-            addSubtask(task.id, input.value.trim());
-            input.value = '';
+    if (checkbox) {
+        checkbox.addEventListener('change', function() {
+            toggleTaskComplete(task.id, this.checked);
         });
     }
 
-    // Subtask checkboxes
-    taskElement.querySelectorAll('.subtask-checkbox').forEach((checkbox, index) => {
-        checkbox.addEventListener('change', function() {
-            toggleSubtaskComplete(task.id, index, this.checked);
+    const deleteBtn = taskElement.querySelector('.delete-task-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this task?')) {
+                deleteTask(task.id);
+            }
         });
-    });
+    }
 
-    // Delete subtask buttons
-    taskElement.querySelectorAll('.delete-subtask-btn').forEach((btn, index) => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            deleteSubtask(task.id, index);
+    const editBtn = taskElement.querySelector('.edit-task-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            editTask(task.id);
         });
-    });
+    }
 
     return taskElement;
 }
@@ -481,7 +621,6 @@ function createTaskElement(task) {
 function toggleTaskComplete(id, completed) {
     let tasks = getCurrentUserTasks();
     const taskIndex = tasks.findIndex(task => task.id === id);
-    
     if (taskIndex !== -1) {
         tasks[taskIndex].completed = completed;
         updateCurrentUserTasks(tasks);
@@ -494,6 +633,19 @@ function deleteTask(id) {
     tasks = tasks.filter(task => task.id !== id);
     updateCurrentUserTasks(tasks);
     loadTasks();
+}
+
+function editTask(id) {
+    const task = getCurrentUserTasks().find(t => t.id === id);
+    if (!task) return;
+    
+    const newText = prompt('Edit task title:', task.text);
+    if (newText && newText.trim()) {
+        task.text = newText.trim();
+        updateCurrentUserTasks(getCurrentUserTasks());
+        loadTasks();
+        showNotification('Task updated successfully!', 'success');
+    }
 }
 
 function updateTask(id, newText, newDescription, newDueDate, newPriority) {
@@ -552,7 +704,7 @@ function deleteSubtask(taskId, subtaskIndex) {
 }
 
 function filterTasks(filter) {
-    const taskElements = document.querySelectorAll('#taskList li');
+    const taskElements = document.querySelectorAll('.task-item');
     
     taskElements.forEach(element => {
         const isCompleted = element.dataset.completed === 'true';
@@ -570,11 +722,545 @@ function filterTasks(filter) {
             case 'high':
                 shouldShow = priority === 'high';
                 break;
-            // 'all' shows everything
         }
         
-        element.style.display = shouldShow ? '' : 'none';
+        element.style.display = shouldShow ? 'block' : 'none';
     });
+}
+
+function searchTasks(query) {
+    const searchTerm = query.toLowerCase().trim();
+    const taskElements = document.querySelectorAll('.task-item');
+    
+    console.log('Search triggered for:', searchTerm);
+    console.log('Found task elements:', taskElements.length);
+    
+    // Show all tasks if search is empty
+    if (searchTerm === '') {
+        taskElements.forEach(element => {
+            element.style.display = 'block';
+            element.classList.remove('search-highlight');
+        });
+        updateSearchResultsCounter(taskElements.length, searchTerm);
+        return;
+    }
+    
+    let visibleCount = 0;
+    
+    taskElements.forEach(element => {
+        // Get task text directly from the element
+        const taskTitleElement = element.querySelector('h3');
+        const taskDescElement = element.querySelector('p');
+        
+        if (!taskTitleElement) {
+            console.log('No h3 element found in task');
+            return;
+        }
+        
+        const taskTitle = taskTitleElement.textContent.toLowerCase();
+        const taskDesc = taskDescElement ? taskDescElement.textContent.toLowerCase() : '';
+        
+        // Simple text matching
+        const matchesSearch = taskTitle.includes(searchTerm) || taskDesc.includes(searchTerm);
+        
+        console.log('Checking task:', taskTitle, 'Matches:', matchesSearch);
+        
+        if (matchesSearch) {
+            element.style.display = 'block';
+            element.classList.add('search-highlight');
+            visibleCount++;
+        } else {
+            element.style.display = 'none';
+            element.classList.remove('search-highlight');
+        }
+    });
+    
+    console.log('Final visible count:', visibleCount);
+    updateSearchResultsCounter(visibleCount, searchTerm);
+}
+
+function updateSearchResults(count, searchTerm) {
+    const searchCounter = document.getElementById('searchResultsCounter');
+    
+    if (searchCounter) {
+        if (searchTerm === '') {
+            searchCounter.textContent = '';
+            searchCounter.className = 'text-xs text-gray-500';
+        } else {
+            searchCounter.textContent = `${count} result${count !== 1 ? 's' : ''}`;
+            searchCounter.className = count > 0 ? 'text-xs text-blue-600 font-medium' : 'text-xs text-gray-500';
+        }
+    }
+}
+
+function updateStatistics(tasks) {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const pendingTasks = totalTasks - completedTasks;
+    const highPriorityTasks = tasks.filter(task => task.priority === 'high').length;
+    
+    // Calculate additional metrics
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const now = new Date();
+    const overdueTasks = tasks.filter(task => !task.completed && task.dueDate && new Date(task.dueDate) < now).length;
+    const urgentTasks = tasks.filter(task => !task.completed && task.priority === 'high' && task.dueDate && new Date(task.dueDate) < new Date(Date.now() + 24 * 60 * 60 * 1000)).length;
+    
+    // Update main statistics
+    document.getElementById('totalTasks').textContent = totalTasks;
+    document.getElementById('completedTasks').textContent = completedTasks;
+    document.getElementById('pendingTasks').textContent = pendingTasks;
+    document.getElementById('highPriorityTasks').textContent = highPriorityTasks;
+    
+    // Update additional statistics
+    document.getElementById('completionRate').textContent = completionRate + '%';
+    document.getElementById('overdueCount').textContent = overdueTasks;
+    document.getElementById('urgentCount').textContent = urgentTasks;
+    
+    // Update progress bar
+    const progressBar = document.getElementById('progressBar');
+    const progressPercentage = document.getElementById('progressPercentage');
+    progressBar.style.width = completionRate + '%';
+    progressPercentage.textContent = completionRate + '%';
+    
+    // Update weekly change (mock data for demonstration)
+    const weeklyChange = Math.floor(Math.random() * 10) - 3; // Random change between -3 and +7
+    document.getElementById('totalChange').textContent = (weeklyChange >= 0 ? '+' : '') + weeklyChange;
+    
+    // Re-initialize Lucide icons
+    lucide.createIcons();
+}
+
+function initializeSortable() {
+    const taskList = document.getElementById('taskList');
+    if (taskList && typeof Sortable !== 'undefined') {
+        new Sortable(taskList, {
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: function(evt) {
+                const taskElements = taskList.querySelectorAll('.task-item');
+                const newOrder = Array.from(taskElements).map(el => parseInt(el.dataset.id));
+                
+                let tasks = getCurrentUserTasks();
+                const reorderedTasks = [];
+                newOrder.forEach(id => {
+                    const task = tasks.find(t => t.id === id);
+                    if (task) reorderedTasks.push(task);
+                });
+                
+                updateCurrentUserTasks(reorderedTasks);
+            }
+        });
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500'
+    };
+    
+    notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-up`;
+    notification.textContent = message;
+    
+    // Add entrance animation
+    notification.style.transform = 'translateX(400px) scale(0.8)';
+    notification.style.opacity = '0';
+    notification.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    
+    document.body.appendChild(notification);
+    
+    requestAnimationFrame(() => {
+        notification.style.transform = 'translateX(0) scale(1)';
+        notification.style.opacity = '1';
+    });
+    
+    setTimeout(() => {
+        notification.style.transform = 'translateX(400px) scale(0.8)';
+        notification.style.opacity = '0';
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+function exportTasks() {
+    try {
+        const tasks = getCurrentUserTasks();
+        const exportData = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            tasks: tasks
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `taskflow-export-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        showNotification('Tasks exported successfully!', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showNotification('Failed to export tasks!', 'error');
+    }
+}
+
+function importTasks(e) {
+    try {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const importData = JSON.parse(event.target.result);
+                
+                if (!importData.tasks || !Array.isArray(importData.tasks)) {
+                    throw new Error('Invalid file format');
+                }
+                
+                // Validate and merge tasks
+                const currentTasks = getCurrentUserTasks();
+                const mergedTasks = [...currentTasks];
+                
+                importData.tasks.forEach(importedTask => {
+                    if (!importedTask.id || !importedTask.text) {
+                        return; // Skip invalid tasks
+                    }
+                    
+                    // Check for duplicates
+                    const exists = mergedTasks.some(task => task.id === importedTask.id);
+                    if (!exists) {
+                        mergedTasks.push({
+                            ...importedTask,
+                            id: Date.now() + Math.random(), // Generate new ID to avoid conflicts
+                            completed: false // Reset completion status
+                        });
+                    }
+                });
+                
+                updateCurrentUserTasks(mergedTasks);
+                loadTasks();
+                showNotification(`Successfully imported ${importData.tasks.length} tasks!`, 'success');
+            } catch (parseError) {
+                console.error('Parse error:', parseError);
+                showNotification('Failed to parse import file!', 'error');
+            }
+        };
+        
+        reader.readAsText(file);
+        
+        // Reset file input
+        e.target.value = '';
+    } catch (error) {
+        console.error('Import error:', error);
+        showNotification('Failed to import tasks!', 'error');
+    }
+}
+
+function clearCompletedTasks() {
+    try {
+        const tasks = getCurrentUserTasks();
+        const incompleteTasks = tasks.filter(task => !task.completed);
+        const completedCount = tasks.length - incompleteTasks.length;
+        
+        if (completedCount === 0) {
+            showNotification('No completed tasks to clear!', 'info');
+            return;
+        }
+        
+        updateCurrentUserTasks(incompleteTasks);
+        loadTasks();
+        showNotification(`Cleared ${completedCount} completed tasks!`, 'success');
+        
+        function updateProgressOverview() {
+            const tasks = getCurrentUserTasks();
+            
+            // Update task counts in header
+            const totalTasksCount = document.getElementById('totalTasksCount');
+            const completedTasksCount = document.getElementById('completedTasksCount');
+            const pendingTasksCount = document.getElementById('pendingTasksCount');
+            
+            if (totalTasksCount) totalTasksCount.textContent = tasks.length;
+            if (completedTasksCount) completedTasksCount.textContent = tasks.filter(t => t.completed).length;
+            if (pendingTasksCount) pendingTasksCount.textContent = tasks.filter(t => !t.completed).length;
+        }
+        
+        updateProgressOverview();
+    } catch (error) {
+        console.error('Clear completed error:', error);
+        showNotification('Failed to clear completed tasks!', 'error');
+    }
+}
+
+function showAnalytics() {
+    try {
+        const tasks = getCurrentUserTasks();
+        
+        // Calculate analytics
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(task => task.completed).length;
+        const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        
+        // Calculate average tasks per day
+        const oldestTask = tasks.reduce((oldest, task) => {
+            const taskDate = new Date(task.createdAt);
+            return taskDate < oldest ? taskDate : oldest;
+        }, new Date());
+        
+        const daysSinceFirst = Math.max(1, Math.ceil((new Date() - oldestTask) / (1000 * 60 * 60 * 24)));
+        const avgTasksPerDay = Math.round((totalTasks / daysSinceFirst) * 10) / 10;
+        
+        // Calculate productivity score (0-100)
+        const highPriorityCompleted = tasks.filter(task => task.priority === 'high' && task.completed).length;
+        const highPriorityTotal = tasks.filter(task => task.priority === 'high').length;
+        const highPriorityScore = highPriorityTotal > 0 ? (highPriorityCompleted / highPriorityTotal) * 50 : 25;
+        const completionScore = completionRate * 0.5;
+        const productivityScore = Math.round(completionScore + highPriorityScore);
+        
+        // Animate analytics display
+        animateAnalyticsDisplay(totalTasks, completionRate, avgTasksPerDay, productivityScore);
+        
+        // Create charts with animation
+        setTimeout(() => {
+            createCategoryChart(tasks);
+            createPriorityChart(tasks);
+        }, 300);
+        
+        // Show modal with animation
+        const modal = document.getElementById('analyticsModal');
+        modal.classList.remove('hidden');
+        modal.style.opacity = '0';
+        modal.style.transform = 'scale(0.9)';
+        
+        requestAnimationFrame(() => {
+            modal.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            modal.style.opacity = '1';
+            modal.style.transform = 'scale(1)';
+        });
+        
+        // Re-initialize Lucide icons
+        setTimeout(() => {
+            lucide.createIcons();
+        }, 100);
+    } catch (error) {
+        console.error('Analytics error:', error);
+        showNotification('Failed to load analytics!', 'error');
+    }
+}
+
+function animateAnalyticsDisplay(total, completion, daily, score) {
+    const elements = [
+        { id: 'analyticsTotal', value: total, duration: 1000 },
+        { id: 'analyticsCompletion', value: completion, duration: 1200, suffix: '%' },
+        { id: 'analyticsDaily', value: daily, duration: 1400 },
+        { id: 'analyticsScore', value: score, duration: 1600 }
+    ];
+    
+    elements.forEach((element, index) => {
+        const el = document.getElementById(element.id);
+        el.style.transform = 'translateY(20px)';
+        el.style.opacity = '0';
+        
+        setTimeout(() => {
+            el.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            el.style.transform = 'translateY(0)';
+            el.style.opacity = '1';
+            animateNumber(el, 0, element.value, element.duration, element.suffix);
+        }, index * 100);
+    });
+}
+
+function createCategoryChart(tasks) {
+    const canvas = document.getElementById('categoryCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Count tasks by category
+    const categories = ['personal', 'work', 'shopping', 'health', 'education', 'other'];
+    const categoryCounts = categories.map(cat => 
+        tasks.filter(task => task.category === cat).length
+    );
+    
+    // Clear previous chart
+    if (window.categoryChartInstance) {
+        window.categoryChartInstance.destroy();
+    }
+    
+    window.categoryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: categories.map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
+            datasets: [{
+                data: categoryCounts,
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#F59E0B', 
+                    '#EF4444', '#8B5CF6', '#6B7280'
+                ],
+                borderWidth: 3,
+                borderColor: '#fff',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} tasks (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+function createPriorityChart(tasks) {
+    const canvas = document.getElementById('priorityCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Count tasks by priority
+    const priorities = ['low', 'medium', 'high', 'urgent'];
+    const priorityCounts = priorities.map(priority => 
+        tasks.filter(task => task.priority === priority).length
+    );
+    
+    // Calculate percentages
+    const totalTasks = tasks.length;
+    const priorityPercentages = priorityCounts.map(count => 
+        totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0
+    );
+    
+    // Animate priority breakdown cards
+    animatePriorityCards(priorityCounts, priorityPercentages);
+    
+    // Clear previous chart
+    if (window.priorityChartInstance) {
+        window.priorityChartInstance.destroy();
+    }
+    
+    window.priorityChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Low', 'Medium', 'High', 'Urgent'],
+            datasets: [{
+                data: priorityCounts,
+                backgroundColor: [
+                    '#10B981', // Green
+                    '#F59E0B', // Yellow
+                    '#EF4444', // Red
+                    '#F97316'  // Orange
+                ],
+                borderWidth: 3,
+                borderColor: '#fff',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} tasks (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
+
+function animatePriorityCards(counts, percentages) {
+    const cards = [
+        { count: 'lowPriorityCount', percent: 'lowPriorityPercent' },
+        { count: 'mediumPriorityCount', percent: 'mediumPriorityPercent' },
+        { count: 'highPriorityCount', percent: 'highPriorityPercent' },
+        { count: 'urgentPriorityCount', percent: 'urgentPriorityPercent' }
+    ];
+    
+    cards.forEach((card, index) => {
+        const countElement = document.getElementById(card.count);
+        const percentElement = document.getElementById(card.percent);
+        
+        // Reset for animation
+        countElement.style.transform = 'scale(0)';
+        countElement.style.opacity = '0';
+        percentElement.style.transform = 'translateY(20px)';
+        percentElement.style.opacity = '0';
+        
+        // Animate with delay
+        setTimeout(() => {
+            countElement.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            countElement.style.transform = 'scale(1)';
+            countElement.style.opacity = '1';
+            
+            percentElement.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            percentElement.style.transform = 'translateY(0)';
+            percentElement.style.opacity = '1';
+            
+            // Animate numbers
+            animateNumber(countElement, 0, counts[index], 800);
+            animateNumber(percentElement, 0, percentages[index], 800, '%');
+        }, index * 150);
+    });
+}
+
+function animateNumber(element, start, end, duration, suffix = '') {
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(start + (end - start) * easeOutQuart);
+        
+        element.textContent = current + suffix;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
 }
 
 function formatDate(date) {
@@ -587,4 +1273,879 @@ function formatDate(date) {
         hour: '2-digit',
         minute: '2-digit'
     });
+}
+
+// ==================== ADVANCED FEATURES ====================
+
+function initializeDatePicker() {
+    const dueDateInput = document.getElementById('dueDate');
+    if (dueDateInput) {
+        flatpickr(dueDateInput, {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+            defaultDate: null,
+            position: 'auto',
+            animate: true,
+            onChange: function(selectedDates, dateStr) {
+                updateQuickDateButtons(selectedDates[0]);
+            }
+        });
+    }
+}
+
+function initializeAdvancedFeatures() {
+    // Voice input
+    initializeVoiceInput();
+    
+    // Smart suggestions
+    initializeSmartSuggestions();
+    
+    // Rich text editor
+    initializeRichTextEditor();
+    
+    // Custom categories
+    initializeCustomCategories();
+    
+    // Tags system
+    initializeTags();
+    
+    // Recurring tasks
+    initializeRecurringTasks();
+    
+    // Templates
+    initializeTemplates();
+    
+    // Quick date buttons
+    initializeQuickDates();
+    
+    // Advanced task view features
+    initializeAdvancedTaskFeatures();
+}
+
+function initializeVoiceInput() {
+    const voiceBtn = document.getElementById('voiceInputBtn');
+    const taskInput = document.getElementById('taskInput');
+    
+    if (!voiceBtn || !taskInput) return;
+    
+    // Check if browser supports Web Speech API
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = new SpeechRecognition();
+        let isListening = false;
+        
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        voiceBtn.addEventListener('click', function() {
+            if (!isListening) {
+                recognition.start();
+                isListening = true;
+                voiceBtn.classList.add('text-red-600');
+                voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                showNotification('Listening... Speak now', 'info');
+            } else {
+                recognition.stop();
+                isListening = false;
+                voiceBtn.classList.remove('text-red-600');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        });
+        
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            taskInput.value = transcript;
+            updateSmartSuggestions();
+        };
+        
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            isListening = false;
+            voiceBtn.classList.remove('text-red-600');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            showNotification('Voice recognition error. Please try again.', 'error');
+        };
+        
+        recognition.onend = function() {
+            isListening = false;
+            voiceBtn.classList.remove('text-red-600');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+    } else {
+        voiceBtn.style.display = 'none';
+    }
+}
+
+function initializeSmartSuggestions() {
+    const taskInput = document.getElementById('taskInput');
+    const suggestionsDiv = document.getElementById('smartSuggestions');
+    const suggestionsList = document.getElementById('suggestionsList');
+    
+    const commonTasks = [
+        'Complete project documentation',
+        'Review pull requests',
+        'Update team on progress',
+        'Schedule team meeting',
+        'Buy groceries',
+        'Pay bills',
+        'Call client',
+        'Send email',
+        'Workout',
+        'Read book',
+        'Clean house',
+        'Prepare presentation'
+    ];
+    
+    taskInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase().trim();
+        if (value.length > 2) {
+            const suggestions = commonTasks.filter(task => 
+                task.toLowerCase().includes(value) && 
+                !value.includes(task.toLowerCase())
+            ).slice(0, 3);
+            
+            if (suggestions.length > 0) {
+                suggestionsDiv.classList.remove('hidden');
+                suggestionsList.innerHTML = suggestions.map(suggestion => 
+                    `<button class="px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" onclick="applySuggestion('${suggestion}')">${suggestion}</button>`
+                ).join('');
+            } else {
+                suggestionsDiv.classList.add('hidden');
+            }
+        } else {
+            suggestionsDiv.classList.add('hidden');
+        }
+    });
+}
+
+function applySuggestion(suggestion) {
+    const taskInput = document.getElementById('taskInput');
+    taskInput.value = suggestion;
+    document.getElementById('smartSuggestions').classList.add('hidden');
+    taskInput.focus();
+}
+
+function initializeRichTextEditor() {
+    const descriptionInput = document.getElementById('taskDescription');
+    const charCount = document.getElementById('charCount');
+    const boldBtn = document.getElementById('formatBold');
+    const italicBtn = document.getElementById('formatItalic');
+    const listBtn = document.getElementById('formatList');
+    
+    descriptionInput.addEventListener('input', function() {
+        const length = this.value.length;
+        charCount.textContent = `${length}/500 characters`;
+        
+        if (length > 450) {
+            charCount.classList.add('text-red-600');
+        } else {
+            charCount.classList.remove('text-red-600');
+        }
+    });
+    
+    boldBtn.addEventListener('click', function() {
+        wrapText('**', '**');
+    });
+    
+    italicBtn.addEventListener('click', function() {
+        wrapText('*', '*');
+    });
+    
+    listBtn.addEventListener('click', function() {
+        wrapText('- ', '');
+    });
+    
+    function wrapText(before, after) {
+        const start = descriptionInput.selectionStart;
+        const end = descriptionInput.selectionEnd;
+        const text = descriptionInput.value;
+        const selectedText = text.substring(start, end);
+        const replacement = before + selectedText + after;
+        
+        descriptionInput.value = text.substring(0, start) + replacement + text.substring(end);
+        
+        // Restore selection
+        descriptionInput.selectionStart = start;
+        descriptionInput.selectionEnd = start + replacement.length;
+        
+        descriptionInput.focus();
+    }
+}
+
+function initializeCustomCategories() {
+    const addCategoryBtn = document.getElementById('addCustomCategory');
+    const categorySelect = document.getElementById('category');
+    
+    addCategoryBtn.addEventListener('click', function() {
+        const categoryName = prompt('Enter custom category name:');
+        if (categoryName && categoryName.trim()) {
+            const option = document.createElement('option');
+            option.value = categoryName.toLowerCase().replace(/\s+/g, '-');
+            option.textContent = categoryName.trim();
+            
+            // Check if category already exists
+            const exists = Array.from(categorySelect.options).some(opt => opt.value === option.value);
+            if (!exists) {
+                categorySelect.add(option);
+                categorySelect.value = option.value;
+                showNotification(`Category "${categoryName}" added successfully!`, 'success');
+            } else {
+                showNotification('Category already exists!', 'error');
+            }
+        }
+    });
+}
+
+function initializeTags() {
+    const tagsInput = document.getElementById('tags');
+    const tagsContainer = document.getElementById('tagsContainer');
+    
+    tagsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const tag = this.value.trim();
+            if (tag) {
+                addTag(tag);
+                this.value = '';
+            }
+        }
+    });
+}
+
+function addTag(tag) {
+    const tagsContainer = document.getElementById('tagsContainer');
+    const existingTags = Array.from(tagsContainer.children).map(child => child.textContent.replace('×', '').trim());
+    
+    if (!existingTags.includes(tag)) {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full';
+        tagElement.innerHTML = `${escapeHtml(tag)} <button class="ml-1 text-blue-600 hover:text-blue-800" onclick="removeTag(this)">&times;</button>`;
+        tagsContainer.appendChild(tagElement);
+    }
+}
+
+function removeTag(button) {
+    button.parentElement.remove();
+}
+
+function getTagsFromInput() {
+    const tagsContainer = document.getElementById('tagsContainer');
+    return Array.from(tagsContainer.children).map(child => child.textContent.replace('×', '').trim());
+}
+
+function initializeRecurringTasks() {
+    const recurringCheckbox = document.getElementById('recurring');
+    const recurringOptions = document.getElementById('recurringOptions');
+    
+    recurringCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            recurringOptions.classList.remove('hidden');
+        } else {
+            recurringOptions.classList.add('hidden');
+        }
+    });
+}
+
+function initializeTemplates() {
+    const saveTemplateBtn = document.getElementById('saveTemplate');
+    const showTemplatesBtn = document.getElementById('showTemplates');
+    
+    saveTemplateBtn.addEventListener('click', function() {
+        saveCurrentTaskAsTemplate();
+    });
+    
+    showTemplatesBtn.addEventListener('click', function() {
+        showTemplatesModal();
+    });
+}
+
+function initializeQuickDates() {
+    const quickDateButtons = document.querySelectorAll('.quick-date');
+    
+    quickDateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const days = parseInt(this.dataset.days);
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + days);
+            
+            const dueDateInput = document.getElementById('dueDate');
+            if (dueDateInput && dueDateInput._flatpickr) {
+                dueDateInput._flatpickr.setDate(futureDate);
+            }
+        });
+    });
+}
+
+function updateQuickDateButtons(selectedDate) {
+    const quickDateButtons = document.querySelectorAll('.quick-date');
+    const today = new Date();
+    
+    quickDateButtons.forEach(button => {
+        const days = parseInt(button.dataset.days);
+        const targetDate = new Date();
+        targetDate.setDate(today.getDate() + days);
+        
+        if (selectedDate && isSameDay(selectedDate, targetDate)) {
+            button.classList.add('bg-blue-600', 'text-white');
+            button.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+        } else {
+            button.classList.remove('bg-blue-600', 'text-white');
+            button.classList.add('bg-gray-100', 'dark:bg-gray-700');
+        }
+    });
+}
+
+// Helper functions
+function isSameDay(date1, date2) {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatRichText(text) {
+    // Convert markdown-like formatting to HTML
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^- (.*)$/gm, '<li>$1</li>')
+        .replace(/(<\/li>)/g, '$1</li>');
+}
+
+function calculateTimeRemaining(task) {
+    const now = new Date();
+    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+    
+    if (!dueDate) {
+        return { text: 'No due date', isOverdue: false };
+    }
+    
+    const diffMs = dueDate - now;
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+    
+    if (diffMs < 0) {
+        return { text: 'Overdue', isOverdue: true };
+    } else if (diffDays > 0) {
+        return { text: `${diffDays} days remaining`, isOverdue: false };
+    } else if (diffHours > 0) {
+        return { text: `${diffHours} hours remaining`, isOverdue: false };
+    } else {
+        return { text: 'Due today', isOverdue: false };
+    }
+}
+
+function calculateTaskProgress(task) {
+    if (!task.subtasks || task.subtasks.length === 0) {
+        return task.completed ? 100 : 0;
+    }
+    
+    const completed = task.subtasks.filter(st => st.completed).length;
+    return Math.round((completed / task.subtasks.length) * 100);
+}
+
+function getPriorityClass(priority) {
+    const classes = {
+        low: 'border-l-4 border-green-500',
+        medium: 'border-l-4 border-yellow-500',
+        high: 'border-l-4 border-red-500',
+        urgent: 'border-l-4 border-orange-500'
+    };
+    return classes[priority] || 'border-l-4 border-gray-300';
+}
+
+function getPriorityEmoji(priority) {
+    const emojis = {
+        low: '🟢',
+        medium: '🟡',
+        high: '🔴',
+        urgent: '🟠'
+    };
+    return emojis[priority] || '📌';
+}
+
+function estimateTaskTime(taskTitle) {
+    // Simple time estimation based on task title length and keywords
+    const words = taskTitle.split(' ').length;
+    const hasComplexWords = /\b(analysis|design|implement|create|develop|build|review|test|document|report|presentation)/i.test(taskTitle);
+    
+    let baseTime = words * 30; // 30 seconds per word
+    if (hasComplexWords) {
+        baseTime *= 2; // Double time for complex tasks
+    }
+    
+    if (baseTime < 300) return '5 min';
+    if (baseTime < 900) return '15 min';
+    if (baseTime < 1800) return '30 min';
+    if (baseTime < 3600) return '1 hour';
+    return '2+ hours';
+}
+
+function analyzeTaskComplexity(taskTitle) {
+    const complexityKeywords = {
+        simple: ['call', 'email', 'buy', 'send', 'pay', 'clean', 'read', 'cook'],
+        medium: ['write', 'create', 'design', 'review', 'test', 'schedule', 'prepare'],
+        complex: ['implement', 'develop', 'build', 'analyze', 'optimize', 'refactor']
+    };
+    
+    const title = taskTitle.toLowerCase();
+    
+    for (const [level, keywords] of Object.entries(complexityKeywords)) {
+        if (keywords.some(keyword => title.includes(keyword))) {
+            return level.charAt(0).toUpperCase() + level.slice(1);
+        }
+    }
+    
+    return 'Simple';
+}
+
+function clearTaskForm() {
+    document.getElementById('taskInput').value = '';
+    document.getElementById('taskDescription').value = '';
+    document.getElementById('dueDate').value = '';
+    document.getElementById('priority').value = 'medium';
+    document.getElementById('category').value = 'personal';
+    document.getElementById('tags').value = '';
+    document.getElementById('tagsContainer').innerHTML = '';
+    document.getElementById('recurring').checked = false;
+    document.getElementById('recurringOptions').classList.add('hidden');
+    document.getElementById('smartSuggestions').classList.add('hidden');
+}
+
+function showTaskCompletionAnimation() {
+    // Add a subtle animation when task is added
+    const taskList = document.getElementById('taskList');
+    const lastTask = taskList.lastElementChild;
+    
+    if (lastTask) {
+        lastTask.style.animation = 'slideUp 0.5s ease-out';
+        setTimeout(() => {
+            lastTask.style.animation = '';
+        }, 500);
+    }
+}
+
+function updateSmartSuggestions() {
+    // Update suggestions based on current input
+    const taskInput = document.getElementById('taskInput');
+    if (taskInput.value) {
+        // Trigger the input event to update suggestions
+        const event = new Event('input', { bubbles: true });
+        taskInput.dispatchEvent(event);
+    }
+}
+
+function saveCurrentTaskAsTemplate() {
+    const taskData = {
+        title: document.getElementById('taskInput').value,
+        description: document.getElementById('taskDescription').value,
+        priority: document.getElementById('priority').value,
+        category: document.getElementById('category').value,
+        tags: getTagsFromInput(),
+        recurring: document.getElementById('recurring').checked,
+        recurringPattern: document.getElementById('recurringPattern').value
+    };
+    
+    const templates = JSON.parse(localStorage.getItem('taskTemplates') || '[]');
+    templates.push(taskData);
+    localStorage.setItem('taskTemplates', JSON.stringify(templates));
+    
+    showNotification('Task template saved!', 'success');
+}
+
+function showTemplatesModal() {
+    const templates = JSON.parse(localStorage.getItem('taskTemplates') || '[]');
+    
+    if (templates.length === 0) {
+        showNotification('No templates saved yet', 'info');
+        return;
+    }
+    
+    const templateHtml = templates.map((template, index) => `
+        <div class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg mb-2">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white">${escapeHtml(template.title)}</h4>
+                    <div class="text-xs text-gray-500">${template.category} • ${template.priority} priority</div>
+                </div>
+                <button onclick="loadTemplate(${index})" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                    Load
+                </button>
+            </div>
+            ${template.description ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2">${escapeHtml(template.description)}</p>` : ''}
+        </div>
+    `).join('');
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Task Templates</h3>
+                <div class="space-y-2">
+                    ${templateHtml}
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="w-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function loadTemplate(index) {
+    const templates = JSON.parse(localStorage.getItem('taskTemplates') || '[]');
+    const template = templates[index];
+    
+    if (template) {
+        document.getElementById('taskInput').value = template.title;
+        document.getElementById('taskDescription').value = template.description;
+        document.getElementById('priority').value = template.priority;
+        document.getElementById('category').value = template.category;
+        
+        // Clear existing tags
+        document.getElementById('tagsContainer').innerHTML = '';
+        
+        // Add tags
+        if (template.tags && template.tags.length > 0) {
+            template.tags.forEach(tag => addTag(tag));
+        }
+        
+        document.getElementById('recurring').checked = template.recurring;
+        if (template.recurring) {
+            document.getElementById('recurringOptions').classList.remove('hidden');
+            document.getElementById('recurringPattern').value = template.recurringPattern;
+        }
+        
+        // Remove the modal
+        document.querySelector('.fixed.inset-0').remove();
+        
+        showNotification('Template loaded successfully!', 'success');
+    }
+}
+
+function duplicateTask(taskId) {
+    const tasks = getCurrentUserTasks();
+    const originalTask = tasks.find(t => t.id === taskId);
+    
+    if (originalTask) {
+        const duplicatedTask = {
+            ...originalTask,
+            id: Date.now() + Math.random(),
+            text: `${originalTask.text} (Copy)`,
+            completed: false,
+            createdAt: new Date().toISOString()
+        };
+        
+        tasks.push(duplicatedTask);
+        updateCurrentUserTasks(tasks);
+        loadTasks();
+        showNotification('Task duplicated successfully!', 'success');
+    }
+}
+
+// Enhanced addTask function
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const descriptionInput = document.getElementById('taskDescription');
+    const dueDateInput = document.getElementById('dueDate');
+    const priorityInput = document.getElementById('priority');
+    const categoryInput = document.getElementById('category');
+    const tagsInput = document.getElementById('tags');
+    const recurringCheckbox = document.getElementById('recurring');
+    const recurringPattern = document.getElementById('recurringPattern');
+
+    if (taskInput.value.trim() === '') {
+        showNotification('Please enter a task title', 'error');
+        return;
+    }
+
+    const task = {
+        id: Date.now() + Math.random(),
+        text: taskInput.value.trim(),
+        description: descriptionInput.value.trim(),
+        dueDate: dueDateInput.value,
+        priority: priorityInput.value,
+        category: categoryInput.value,
+        tags: getTagsFromInput(),
+        recurring: recurringCheckbox.checked,
+        recurringPattern: recurringCheckbox.checked ? recurringPattern.value : null,
+        completed: false,
+        subtasks: [],
+        createdAt: new Date().toISOString(),
+        estimatedTime: estimateTaskTime(taskInput.value.trim()),
+        complexity: analyzeTaskComplexity(taskInput.value.trim())
+    };
+
+    let tasks = getCurrentUserTasks();
+    tasks.push(task);
+    updateCurrentUserTasks(tasks);
+
+    // Clear form
+    clearTaskForm();
+    
+    // Show completion animation
+    showTaskCompletionAnimation();
+    
+    loadTasks();
+    showNotification('Task added successfully!', 'success');
+    
+    // Update smart suggestions based on new task
+    updateSmartSuggestions();
+}
+
+// ==================== ADVANCED TASK VIEW FEATURES ====================
+
+function initializeAdvancedTaskFeatures() {
+    // View toggle functionality
+    initializeViewToggle();
+    
+    // Sort functionality
+    initializeSortFunctionality();
+    
+    // Bulk actions
+    initializeBulkActions();
+    
+    // Advanced search
+    initializeAdvancedSearch();
+    
+    // Task statistics
+    initializeTaskStatistics();
+    
+    // Enhanced filters
+    initializeEnhancedFilters();
+}
+
+function initializeViewToggle() {
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const taskList = document.getElementById('taskList');
+    
+    if (gridViewBtn && listViewBtn && taskList) {
+        gridViewBtn.addEventListener('click', function() {
+            taskList.className = 'task-container grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[400px]';
+            gridViewBtn.classList.add('bg-white', 'bg-opacity-30');
+            listViewBtn.classList.remove('bg-white', 'bg-opacity-30');
+            this.setAttribute('aria-pressed', 'true');
+            listViewBtn.setAttribute('aria-pressed', 'false');
+        });
+        
+        listViewBtn.addEventListener('click', function() {
+            taskList.className = 'task-container space-y-3 min-h-[400px]';
+            listViewBtn.classList.add('bg-white', 'bg-opacity-30');
+            gridViewBtn.classList.remove('bg-white', 'bg-opacity-30');
+            this.setAttribute('aria-pressed', 'true');
+            gridViewBtn.setAttribute('aria-pressed', 'false');
+        });
+    }
+}
+
+function initializeSortFunctionality() {
+    const sortDropdown = document.getElementById('sortDropdown');
+    const sortMenu = document.getElementById('sortMenu');
+    
+    if (sortDropdown && sortMenu) {
+        sortDropdown.addEventListener('click', function() {
+            sortMenu.classList.toggle('hidden');
+            const isExpanded = !sortMenu.classList.contains('hidden');
+            this.setAttribute('aria-expanded', isExpanded);
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!sortDropdown.contains(e.target) && !sortMenu.contains(e.target)) {
+                sortMenu.classList.add('hidden');
+                sortDropdown.setAttribute('aria-expanded', 'false');
+            }
+        });
+        
+        sortMenu.querySelectorAll('button[data-sort]').forEach(button => {
+            button.addEventListener('click', function() {
+                const sortBy = this.dataset.sort;
+                sortTasks(sortBy);
+                sortMenu.classList.add('hidden');
+                sortDropdown.setAttribute('aria-expanded', 'false');
+                showNotification('Tasks sorted by ' + sortBy, 'success');
+            });
+        });
+    }
+}
+
+function sortTasks(sortBy) {
+    let tasks = getCurrentUserTasks();
+    
+    switch(sortBy) {
+        case 'date':
+            tasks.sort((a, b) => {
+                if (!a.dueDate) return 1;
+                if (!b.dueDate) return -1;
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+            break;
+        case 'priority':
+            const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+            tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+            break;
+        case 'name':
+            tasks.sort((a, b) => a.text.localeCompare(b.text));
+            break;
+        case 'category':
+            tasks.sort((a, b) => a.category.localeCompare(b.category));
+            break;
+    }
+    
+    updateCurrentUserTasks(tasks);
+    loadTasks();
+}
+
+function initializeBulkActions() {
+    const bulkActionsBtn = document.getElementById('bulkActionsBtn');
+    const bulkActionsBar = document.getElementById('bulkActionsBar');
+    const selectAllTasks = document.getElementById('selectAllTasks');
+    const bulkCompleteBtn = document.getElementById('bulkCompleteBtn');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const bulkCancelBtn = document.getElementById('bulkCancelBtn');
+    
+    let selectedTasks = new Set();
+    
+    if (bulkActionsBtn && bulkActionsBar) {
+        bulkActionsBtn.addEventListener('click', function() {
+            const isHidden = bulkActionsBar.classList.contains('hidden');
+            if (isHidden) {
+                bulkActionsBar.classList.remove('hidden');
+                this.classList.add('bg-blue-600', 'text-white');
+                showNotification('Bulk selection mode enabled', 'info');
+            } else {
+                bulkActionsBar.classList.add('hidden');
+                this.classList.remove('bg-blue-600', 'text-white');
+                selectedTasks.clear();
+                loadTasks();
+                showNotification('Bulk selection mode disabled', 'info');
+            }
+        });
+        
+        if (selectAllTasks) {
+            selectAllTasks.addEventListener('change', function() {
+                const taskCheckboxes = document.querySelectorAll('.task-bulk-checkbox');
+                taskCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                    const taskId = parseInt(checkbox.dataset.taskId);
+                    if (this.checked) {
+                        selectedTasks.add(taskId);
+                    } else {
+                        selectedTasks.delete(taskId);
+                    }
+                });
+                updateSelectedCount();
+            });
+        }
+        
+        if (bulkCompleteBtn) {
+            bulkCompleteBtn.addEventListener('click', function() {
+                if (selectedTasks.size === 0) {
+                    showNotification('No tasks selected', 'error');
+                    return;
+                }
+                
+                let tasks = getCurrentUserTasks();
+                tasks.forEach(task => {
+                    if (selectedTasks.has(task.id)) {
+                        task.completed = true;
+                    }
+                });
+                
+                updateCurrentUserTasks(tasks);
+                selectedTasks.clear();
+                loadTasks();
+                showNotification('Tasks marked as complete', 'success');
+            });
+        }
+        
+        if (bulkDeleteBtn) {
+            bulkDeleteBtn.addEventListener('click', function() {
+                if (selectedTasks.size === 0) {
+                    showNotification('No tasks selected', 'error');
+                    return;
+                }
+                
+                if (confirm('Delete ' + selectedTasks.size + ' tasks?')) {
+                    let tasks = getCurrentUserTasks();
+                    tasks = tasks.filter(task => !selectedTasks.has(task.id));
+                    updateCurrentUserTasks(tasks);
+                    selectedTasks.clear();
+                    loadTasks();
+                    showNotification('Tasks deleted', 'success');
+                }
+            });
+        }
+        
+        if (bulkCancelBtn) {
+            bulkCancelBtn.addEventListener('click', function() {
+                selectedTasks.clear();
+                loadTasks();
+                showNotification('Bulk selection cancelled', 'info');
+            });
+        }
+    }
+    
+    window.bulkSelection = { selectedTasks, updateSelectedCount };
+}
+
+function updateSelectedCount() {
+    const selectedCount = document.getElementById('selectedCount');
+    if (selectedCount && window.bulkSelection) {
+        selectedCount.textContent = window.bulkSelection.selectedTasks.size;
+    }
+}
+
+function initializeAdvancedSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    
+    if (searchInput && clearSearchBtn) {
+        searchInput.addEventListener('input', function() {
+            searchTasks(this.value);
+        });
+        
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            searchTasks('');
+            searchInput.focus();
+        });
+    }
+}
+
+function initializeTaskStatistics() {
+    updateTaskStatistics();
+}
+
+function updateTaskStatistics() {
+    const tasks = getCurrentUserTasks();
+    const totalTasks = tasks.length;
+    const activeTasks = tasks.filter(task => !task.completed).length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const urgentTasks = tasks.filter(task => task.priority === 'urgent' && !task.completed).length;
+    
+    const statTotal = document.getElementById('statTotal');
+    const statActive = document.getElementById('statActive');
+    const statCompleted = document.getElementById('statCompleted');
+    const statUrgent = document.getElementById('statUrgent');
+    
+    if (statTotal) statTotal.textContent = totalTasks;
+    if (statActive) statActive.textContent = activeTasks;
+    if (statCompleted) statCompleted.textContent = completedTasks;
+    if (statUrgent) statUrgent.textContent = urgentTasks;
+}
+
+function initializeEnhancedFilters() {
+    // Enhanced filter functionality
 }

@@ -1,185 +1,827 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="keywords" content="to do list, online to do list, to do list app" />
-    <meta name="description" content="Modern, responsive To Do List App with local storage, task prioritization, due dates, and more." />
-    <meta name="author" content="Ntokozo Mahlaela" />
-    <title>Ntokozo's To-Do List</title>
-    <script src="https://kit.fontawesome.com/9c206210e0.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="keywords" content="to do list, online to do list, to do list app, task management, productivity">
+    <meta name="description" content="Modern, feature-rich To-Do List App with task categories, search, drag-and-drop, and beautiful UI.">
+    <meta name="author" content="Ntokozo Mahlaela">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TaskFlow">
+    <meta name="application-name" content="TaskFlow">
+    <meta name="msapplication-TileColor" content="#3B82F6">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+    <link rel="preload" href="https://unpkg.com/lucide@latest" as="script">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//images.unsplash.com">
+    
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="TaskFlow - Modern Task Management">
+    <meta property="og:description" content="A beautiful, feature-rich task management application built with modern web technologies.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/3B82F6/ffffff?text=TaskFlow">
+    <meta property="og:url" content="">
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TaskFlow - Modern Task Management">
+    <meta name="twitter:description" content="A beautiful, feature-rich task management application built with modern web technologies.">
+    <meta name="twitter:image" content="https://via.placeholder.com/1200x630/3B82F6/ffffff?text=TaskFlow">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzNCODJGNiIvPgo8cGF0aCBkPSJNMTAgOEMxMC44MyA4IDExLjUgOC42NyAxMS41IDkuNVYxOC41QzExLjUgMTkuMzMgMTAuODMgMjAgMTAgMjBIMkMxLjE3IDIwIDAuNSAxOS4zMyAwLjUgMTguNVY5LjVDMC41IDguNjcgMS4xNyA4IDIgOEgxMFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMzQjgyRjYiLz4KPHBhdGggZD0iTTY0IDQ4SDEyOEMxMzYuOTcgNDggMTQ0IDU1LjAzIDE0NCA2NFYxMjhDMTQ0IDEzNi45NyAxMzYuOTcgMTQ0IDEyOCAxNDRINjRDMTU1LjAzIDE0NCAxNDggMTM2Ljk3IDE0OCAxMjhWNjRDMTQ4IDU1LjAzIDE1NS4wMyA0OCAxNjQgNDhaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNODAgOEgxMTJWMTYwSDgwVjhaIiBmaWxsPSIjM0I4MkY2Ii8+CjxwYXRoIGQ9Ik05NiAzMkwxMTIgNDhMODAgNDhMMTYgOTZMMCA4MEwzMiAyNEw5NiAzMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+    <title>TaskFlow - Modern Task Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dragula@latest/dist/dragula.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <!-- Login/Register Modal -->
-    <div id="authModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Welcome to Your To-Do List</h2>
-                <p>Please login or register to continue</p>
-            </div>
-            <div class="modal-body">
-                <div class="auth-tabs">
-                    <button class="tab-btn active" data-tab="login">Login</button>
-                    <button class="tab-btn" data-tab="register">Register</button>
-                </div>
-                
-                <div id="login-form" class="auth-form active">
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label for="login-email">Email</label>
-                            <input type="email" id="login-email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="login-password">Password</label>
-                            <input type="password" id="login-password" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Login</button>
-                    </form>
-                </div>
-                
-                <div id="register-form" class="auth-form">
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <label for="register-name">Full Name</label>
-                            <input type="text" id="register-name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-email">Email</label>
-                            <input type="email" id="register-email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="register-password">Password</label>
-                            <input type="password" id="register-password" class="form-control" required minlength="6">
-                        </div>
-                        <div class="form-group">
-                            <label for="register-confirm">Confirm Password</label>
-                            <input type="password" id="register-confirm" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Register</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App Content (hidden until logged in) -->
-    <div id="app-content" style="display: none;">
-        <div class="content-wrapper">
-        <!-- Background Settings Dropdown -->
-        <div class="bg-settings">
-            <div class="bg-dropdown">
-                <button class="bg-btn">
-                    <i class="fas fa-image"></i>
-                    <span> Change Background</span>
-                </button>
-                <div class="bg-content">
-                    <div class="bg-option" data-bg="none">
-                        <i class="fas fa-times"></i>
-                        <span>No Background</span>
+<body class="h-full transition-colors duration-300">
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-lg z-50">
+        Skip to main content
+    </a>
+    
+    <!-- Main App Content -->
+    <main id="app-content" class="min-h-screen transition-colors duration-300" role="application" aria-label="TaskFlow Application">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 relative z-40 fixed top-0 left-0 right-0" role="banner">
+            <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <i data-lucide="check-square" class="w-8 h-8 text-blue-600 dark:text-blue-400 mr-3" aria-hidden="true"></i>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">TaskFlow</h1>
                     </div>
-                    <div class="bg-option" data-bg="url('https://images.unsplash.com/photo-1499002238440-d264edd596ec?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
-                        <i class="fas fa-mountain"></i>
-                        <span>Mountain View</span>
-                    </div>
-                    <div class="bg-option" data-bg="url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
-                        <i class="fas fa-water"></i>
-                        <span>Lake View</span>
-                    </div>
-                    <div class="bg-option" data-bg="url('https://images.unsplash.com/photo-1490730141103-6cac27aaab94?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
-                        <i class="fas fa-cloud"></i>
-                        <span>Cloudy Sky</span>
-                    </div>
-                    <div class="bg-option" data-bg="url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
-                        <i class="fas fa-tree"></i>
-                        <span>Forest</span>
-                    </div>
-                    <div class="bg-option" data-bg="url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')">
-                        <i class="fas fa-umbrella-beach"></i>
-                        <span>Beach</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="header">
-                <h1>Ntokozo's To-Do List</h1>
-                <p>Organize your tasks efficiently and beautifully</p>
-                <button id="logout-btn" class="btn btn-outline-danger btn-sm">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-
-            <div class="app-container">
-                <div class="task-add-box">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Add New Task</h5>
+                    
+                    <div class="flex items-center space-x-2 sm:space-x-4 relative">
+                        <!-- Mobile Search Bar -->
+                        <div class="flex-1 sm:hidden">
+                            <label for="mobileSearchInput" class="sr-only">Search tasks</label>
+                            <div class="relative">
+                                <input type="text" id="mobileSearchInput" placeholder="Search..." 
+                                    class="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    aria-label="Search tasks" aria-describedby="mobile-search-help">
+                                <i data-lucide="search" class="absolute left-2.5 top-2.5 w-4 h-4 text-gray-400" aria-hidden="true"></i>
+                                <span id="mobile-search-help" class="sr-only">Type to search tasks by title or description</span>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <form id="addingForm" class="form-group">
-                                <div class="mb-3">
-                                    <input id="taskInput" class="form-control" type="text" placeholder="Enter a task" required>
+                        
+                        <!-- Desktop Search Bar -->
+                        <div class="hidden md:block">
+                            <label for="searchInput" class="sr-only">Search tasks</label>
+                            <div class="relative">
+                                <input type="text" id="searchInput" placeholder="Search tasks..." 
+                                    class="w-48 lg:w-64 pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                                    aria-label="Search tasks" aria-describedby="search-help">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" aria-hidden="true"></i>
+                                <span id="search-help" class="sr-only">Type to search tasks by title or description</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dark Mode Toggle -->
+                        <button id="darkModeToggle" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                aria-label="Toggle dark mode" aria-pressed="false">
+                            <i data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400 dark:hidden" aria-hidden="true"></i>
+                            <i data-lucide="sun" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400 hidden dark:block" aria-hidden="true"></i>
+                        </button>
+                        
+                        <!-- Advanced Features -->
+                        <div class="relative">
+                            <button id="advancedMenu" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    aria-label="Advanced settings" aria-expanded="false" aria-haspopup="true">
+                                <i data-lucide="settings" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" aria-hidden="true"></i>
+                            </button>
+                            
+                            <div id="advancedMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                                 role="menu" aria-labelledby="advancedMenu">
+                                <div class="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Advanced</p>
                                 </div>
-                                <div class="mb-3">
-                                    <textarea id="taskDescription" class="form-control" rows="2" placeholder="Description (optional)"></textarea>
+                                <button id="exportBtn" class="w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        role="menuitem" aria-label="Export tasks to JSON file">
+                                    <i data-lucide="download" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Export Tasks</span>
+                                    <span class="sm:hidden">Export</span>
+                                </button>
+                                <button id="importBtn" class="w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        role="menuitem" aria-label="Import tasks from JSON file">
+                                    <i data-lucide="upload" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Import Tasks</span>
+                                    <span class="sm:hidden">Import</span>
+                                </button>
+                                <button id="keyboardShortcutsBtn" class="w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        role="menuitem" aria-label="View keyboard shortcuts">
+                                    <i data-lucide="keyboard" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Keyboard Shortcuts</span>
+                                    <span class="sm:hidden">Shortcuts</span>
+                                </button>
+                                <button id="analyticsBtn" class="w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        role="menuitem" aria-label="View task analytics">
+                                    <i data-lucide="bar-chart" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Analytics</span>
+                                    <span class="sm:hidden">Stats</span>
+                                </button>
+                                <button id="clearAllBtn" class="w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        role="menuitem" aria-label="Clear all data">
+                                    <i data-lucide="trash" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Clear All Data</span>
+                                    <span class="sm:hidden">Clear</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Background Settings -->
+                        <div class="relative">
+                            <button id="bgToggle" class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    aria-label="Change background" aria-expanded="false" aria-haspopup="true">
+                                <i data-lucide="image" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" aria-hidden="true"></i>
+                            </button>
+                            
+                            <div id="bgMenu" class="hidden absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                                 role="menu" aria-labelledby="bgToggle">
+                                <div class="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">Background</p>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="dueDate">Due Date</label>
-                                        <input id="dueDate" class="form-control" type="datetime-local" placeholder="Select date">
+                                <button class="bg-option w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
+                                        data-bg="url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080')" role="menuitem" aria-label="Set mountain background">
+                                    <i data-lucide="mountain" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Mountain</span>
+                                    <span class="sm:hidden">Mtn</span>
+                                </button>
+                                <button class="bg-option w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
+                                        data-bg="url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&h=1080')" role="menuitem" aria-label="Set ocean background">
+                                    <i data-lucide="waves" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Ocean</span>
+                                    <span class="sm:hidden">Sea</span>
+                                </button>
+                                <button class="bg-option w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
+                                        data-bg="url('https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920&h=1080')" role="menuitem" aria-label="Set forest background">
+                                    <i data-lucide="trees" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Forest</span>
+                                    <span class="sm:hidden">For</span>
+                                </button>
+                                <button class="bg-option w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
+                                        data-bg="url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080')" role="menuitem" aria-label="Set sky background">
+                                    <i data-lucide="cloud" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Sky</span>
+                                    <span class="sm:hidden">Sky</span>
+                                </button>
+                                <button class="bg-option w-full text-left px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" 
+                                        data-bg="url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=1080')" role="menuitem" aria-label="Set sunset background">
+                                    <i data-lucide="sun" class="w-3 h-3 sm:w-4 sm:h-4 mr-2 inline" aria-hidden="true"></i>
+                                    <span class="hidden sm:inline">Sunset</span>
+                                    <span class="sm:hidden">Sun</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24 w-full" role="main">
+            <!-- Statistics Dashboard -->
+            <section class="mb-8" aria-labelledby="stats-heading">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 animate-slide-up">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h3 id="stats-heading" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center mb-3 sm:mb-0">
+                            <i data-lucide="bar-chart-2" class="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
+                            <span class="hidden sm:inline">Task Analytics Dashboard</span>
+                            <span class="sm:hidden">Analytics</span>
+                        </h3>
+                        <button id="analyticsQuickBtn" class="px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center text-sm">
+                            <i data-lucide="trending-up" class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" aria-hidden="true"></i>
+                            <span class="hidden sm:inline">View Details</span>
+                            <span class="sm:hidden">Details</span>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Total Tasks</span>
+                                <i data-lucide="layers" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" aria-hidden="true"></i>
+                            </div>
+                            <span id="totalTasks" class="text-2xl sm:text-3xl font-bold text-blue-900 dark:text-blue-100" aria-live="polite">0</span>
+                            <div class="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                                <span id="totalChange">+0</span> from last week
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 p-3 sm:p-4 rounded-lg border border-green-200 dark:border-green-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">Completed</span>
+                                <i data-lucide="check-circle" class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" aria-hidden="true"></i>
+                            </div>
+                            <span id="completedTasks" class="text-2xl sm:text-3xl font-bold text-green-900 dark:text-green-100" aria-live="polite">0</span>
+                            <div class="mt-2 text-xs text-green-600 dark:text-green-400">
+                                <span id="completionRate">0%</span> completion rate
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 p-3 sm:p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs sm:text-sm font-medium text-orange-700 dark:text-orange-300">Pending</span>
+                                <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" aria-hidden="true"></i>
+                            </div>
+                            <span id="pendingTasks" class="text-2xl sm:text-3xl font-bold text-orange-900 dark:text-orange-100" aria-live="polite">0</span>
+                            <div class="mt-2 text-xs text-orange-600 dark:text-orange-400">
+                                <span id="overdueCount">0</span> overdue tasks
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 p-3 sm:p-4 rounded-lg border border-red-200 dark:border-red-700">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs sm:text-sm font-medium text-red-700 dark:text-red-300">High Priority</span>
+                                <i data-lucide="alert-circle" class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" aria-hidden="true"></i>
+                            </div>
+                            <span id="highPriorityTasks" class="text-2xl sm:text-3xl font-bold text-red-900 dark:text-red-100" aria-live="polite">0</span>
+                            <div class="mt-2 text-xs text-red-600 dark:text-red-400">
+                                <span id="urgentCount">0</span> urgent tasks
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Progress</span>
+                            <span id="progressPercentage" class="text-sm font-medium text-gray-600 dark:text-gray-400">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                            <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Add Task Section -->
+                <section class="xl:col-span-1" aria-labelledby="add-task-heading">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden animate-slide-up">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4">
+                            <h2 id="add-task-heading" class="text-lg font-semibold text-white flex items-center">
+                                <i data-lucide="plus-circle" class="w-5 h-5 mr-2" aria-hidden="true"></i>
+                                Add New Task
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <form id="addingForm" class="space-y-4" aria-label="Add new task form">
+                                <div>
+                                    <label for="taskInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Title</label>
+                                    <div class="relative">
+                                        <input id="taskInput" type="text" placeholder="What needs to be done?" 
+                                               class="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200" 
+                                               required aria-describedby="task-title-help" autocomplete="off">
+                                        <div class="absolute inset-y-0 right-0 flex items-center">
+                                            <button type="button" id="voiceInputBtn" class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Voice Input">
+                                                <i class="fas fa-microphone"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="priority">Priority</label>
-                                        <select id="priority" class="form-control">
-                                            <option value="low">Low</option>
-                                            <option value="medium" selected>Medium</option>
-                                            <option value="high">High</option>
+                                    <div id="smartSuggestions" class="mt-2 hidden">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Smart suggestions:</div>
+                                        <div id="suggestionsList" class="flex flex-wrap gap-1"></div>
+                                    </div>
+                                    <span id="task-title-help" class="sr-only">Enter a title for your task</span>
+                                </div>
+                                
+                                <div>
+                                    <label for="taskDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                    <textarea id="taskDescription" rows="3" placeholder="Add more details..." 
+                                              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200 resize-none"
+                                              aria-describedby="task-desc-help"></textarea>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <span id="charCount" class="text-xs text-gray-500">0/500 characters</span>
+                                        <div class="flex gap-1">
+                                            <button type="button" id="formatBold" class="p-1 text-gray-400 hover:text-gray-600 text-xs" title="Bold">
+                                                <i class="fas fa-bold"></i>
+                                            </button>
+                                            <button type="button" id="formatItalic" class="p-1 text-gray-400 hover:text-gray-600 text-xs" title="Italic">
+                                                <i class="fas fa-italic"></i>
+                                            </button>
+                                            <button type="button" id="formatList" class="p-1 text-gray-400 hover:text-gray-600 text-xs" title="List">
+                                                <i class="fas fa-list"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span id="task-desc-help" class="sr-only">Optional: Add more details about your task</span>
+                                </div>
+                                
+                                <div>
+                                    <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                    <div class="relative">
+                                        <select id="category" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200 appearance-none cursor-pointer"
+                                                aria-describedby="category-help">
+                                            <option value="personal">👤 Personal</option>
+                                            <option value="work">💼 Work</option>
+                                            <option value="shopping">🛒 Shopping</option>
+                                            <option value="health">❤️ Health</option>
+                                            <option value="education">📚 Education</option>
+                                            <option value="finance">💰 Finance</option>
+                                            <option value="home">🏠 Home</option>
+                                            <option value="travel">✈️ Travel</option>
+                                            <option value="other">📌 Other</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="addCustomCategory" class="mt-2 text-xs text-blue-600 hover:text-blue-800 transition-colors">
+                                        <i class="fas fa-plus mr-1"></i>Add Custom Category
+                                    </button>
+                                    <span id="category-help" class="sr-only">Choose a category for your task</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                    <div>
+                                        <label for="dueDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
+                                        <div class="relative">
+                                            <input id="dueDate" type="text" placeholder="Select date & time" 
+                                                   class="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white cursor-pointer transition-all duration-200"
+                                                   aria-describedby="due-date-help" readonly>
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-calendar text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 flex gap-1">
+                                            <button type="button" class="quick-date px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" data-days="1">1 day</button>
+                                            <button type="button" class="quick-date px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" data-days="3">3 days</button>
+                                            <button type="button" class="quick-date px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600" data-days="7">1 week</button>
+                                        </div>
+                                        <span id="due-date-help" class="sr-only">Optional: Set a due date and time</span>
+                                    </div>
+                                    <div>
+                                        <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+                                        <div class="relative">
+                                            <select id="priority" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200 appearance-none cursor-pointer"
+                                                    aria-describedby="priority-help">
+                                                <option value="low">🟢 Low</option>
+                                                <option value="medium" selected>🟡 Medium</option>
+                                                <option value="high">🔴 High</option>
+                                                <option value="urgent">🟠 Urgent</option>
+                                            </select>
+                                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-flag text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <span id="priority-help" class="sr-only">Set the priority level</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label for="tags" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                                    <div class="flex flex-wrap gap-2 mb-2" id="tagsContainer"></div>
+                                    <input id="tags" type="text" placeholder="Add tags (press Enter)" 
+                                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white text-sm">
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <input type="checkbox" id="recurring" class="mr-2">
+                                        <span>Recurring Task</span>
+                                    </label>
+                                    <div id="recurringOptions" class="hidden mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <select id="recurringPattern" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-600 dark:text-white">
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                            <option value="custom">Custom</option>
                                         </select>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-plus"></i> Add Task
-                                </button>
+                                
+                                <div class="mt-6 flex gap-3">
+                                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Add Task
+                                    </button>
+                                    <button type="button" id="saveTemplate" class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 font-medium" title="Save as Template">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" id="showTemplates" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                                        <i class="fas fa-history mr-1"></i>Saved
+                                    </button>
+                                </div>
+                                <span id="add-task-help" class="sr-only">Submit form to add new task</span>
                             </form>
                         </div>
-                    </div>
-                </div>
+                </section>
 
-                <div class="list-box">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="m-0">My Tasks</h5>
-                            <div class="filter-controls">
-                                <button class="filter-btn active" data-filter="all">All</button>
-                                <button class="filter-btn" data-filter="active">Active</button>
-                                <button class="filter-btn" data-filter="completed">Completed</button>
-                                <button class="filter-btn" data-filter="high">High Priority</button>
+                <!-- Advanced Tasks Section -->
+                <section class="xl:col-span-2" aria-labelledby="tasks-heading">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-slide-up">
+                        <!-- Enhanced Header with Stats -->
+                        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-black opacity-10"></div>
+                            <div class="relative z-10">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+                                    <div>
+                                        <h2 id="tasks-heading" class="text-2xl font-bold text-white flex items-center mb-2">
+                                            <i data-lucide="list-checks" class="w-6 h-6 mr-3" aria-hidden="true"></i>
+                                            My Tasks
+                                        </h2>
+                                        <div class="flex items-center space-x-4 text-white text-opacity-90">
+                                            <span class="text-sm flex items-center">
+                                                <i data-lucide="target" class="w-4 h-4 mr-1"></i>
+                                                <span id="totalTasksCount">0</span> total
+                                            </span>
+                                            <span class="text-sm flex items-center">
+                                                <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                                                <span id="completedTasksCount">0</span> completed
+                                            </span>
+                                            <span class="text-sm flex items-center">
+                                                <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                                                <span id="pendingTasksCount">0</span> pending
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 lg:mt-0 flex items-center space-x-3">
+                                        <button id="viewToggle" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-200 flex items-center" title="Toggle view">
+                                            <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i>
+                                            <span id="viewText">Grid</span>
+                                        </button>
+                                        <button id="sortTasks" class="px-4 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-200 flex items-center" title="Sort tasks">
+                                            <i data-lucide="arrow-up-down" class="w-4 h-4 mr-2"></i>
+                                            Sort
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Advanced Filter Pills -->
+                                <div class="flex flex-wrap gap-2" role="group" aria-label="Filter tasks">
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-25 text-white hover:bg-opacity-35 transition-all duration-200 active shadow-lg" 
+                                            data-filter="all" aria-pressed="true">
+                                        <i data-lucide="list" class="w-4 h-4 mr-1 inline"></i>All Tasks
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200" 
+                                            data-filter="active" aria-pressed="false">
+                                        <i data-lucide="play-circle" class="w-4 h-4 mr-1 inline"></i>Active
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200" 
+                                            data-filter="completed" aria-pressed="false">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4 mr-1 inline"></i>Completed
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200" 
+                                            data-filter="high" aria-pressed="false">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 mr-1 inline"></i>High Priority
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200" 
+                                            data-filter="today" aria-pressed="false">
+                                        <i data-lucide="calendar-days" class="w-4 h-4 mr-1 inline"></i>Due Today
+                                    </button>
+                                    <button class="filter-btn px-4 py-2 text-sm font-medium rounded-full bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-all duration-200" 
+                                            data-filter="overdue" aria-pressed="false">
+                                        <i data-lucide="alert-triangle" class="w-4 h-4 mr-1 inline"></i>Overdue
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body p-0">
-                            <ul id="taskList" class="list-group">
-                                <div class="empty-state">
-                                    <i class="fas fa-tasks"></i>
-                                    <h4>No tasks yet</h4>
-                                    <p>Add your first task to get started</p>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 p-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <!-- Search and Quick Actions -->
+                                <div class="flex-1 flex items-center space-x-3">
+                                    <div class="relative flex-1 max-w-md">
+                                        <label for="mobileSearchInput" class="sr-only">Search tasks</label>
+                                        <input type="text" id="mobileSearchInput" placeholder="🔍 Search tasks, tags, or categories..." 
+                                               class="w-full px-4 py-2 pl-10 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-600 dark:text-white text-sm"
+                                               aria-label="Search tasks" aria-describedby="mobile-search-help">
+                                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" aria-hidden="true"></i>
+                                        <span id="searchResultsCounter" class="absolute right-3 top-2.5 text-xs text-gray-500"></span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="bulkSelect" class="px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors text-sm" title="Bulk select">
+                                            <i data-lucide="check-square" class="w-4 h-4"></i>
+                                        </button>
+                                        <button id="clearCompleted" class="px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 transition-colors text-sm" title="Clear completed">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </ul>
+                                
+                                <!-- View Options -->
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-600 dark:text-gray-400 hidden sm:inline">View:</span>
+                                    <div class="flex bg-white dark:bg-gray-600 rounded-lg border border-gray-300 dark:border-gray-500">
+                                        <button class="view-option px-3 py-1 text-sm rounded-l-lg hover:bg-gray-100 dark:hover:bg-gray-500 transition-colors" data-view="list">
+                                            <i data-lucide="list" class="w-4 h-4"></i>
+                                        </button>
+                                        <button class="view-option px-3 py-1 text-sm rounded-r-lg hover:bg-gray-100 dark:hover:bg-gray-500 transition-colors bg-blue-100 dark:bg-blue-900" data-view="grid">
+                                            <i data-lucide="grid" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                            </div>
+                            <span id="mobile-search-help" class="sr-only">Type to search tasks by title, description, tags, or categories</span>
+                        </div>
+                        
+                        <!-- Advanced Task List Container -->
+                        <div class="p-6 h-full flex flex-col">
+                            <!-- Task List/Grid Container -->
+                            <div id="taskList" class="space-y-4 flex-1 overflow-y-auto overflow-x-hidden" role="list" aria-label="Task list" style="max-height: calc(100vh - 200px);">
+                                <!-- Enhanced Empty State -->
+                                <div class="empty-state text-center py-16" role="status">
+                                    <div class="relative inline-block mb-6">
+                                        <div class="absolute inset-0 bg-blue-100 dark:bg-blue-900 rounded-full blur-2xl opacity-30"></div>
+                                        <i data-lucide="inbox" class="relative w-20 h-20 text-gray-300 dark:text-gray-600" aria-hidden="true"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Your task list is empty</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                                        Start by adding your first task using the form above.
+                                    </p>
+                                    <div class="flex justify-center space-x-3">
+                                        <button onclick="document.getElementById('taskInput').focus()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                                            Add First Task
+                                        </button>
+                                        <button id="showTemplatesEmpty" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center">
+                                            <i data-lucide="bookmark" class="w-4 h-4 mr-2"></i>
+                                            Saved
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="bulkActionsBar" class="hidden mt-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg border border-blue-200 dark:border-gray-500">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <span id="selectedCount">0</span> tasks selected
+                                        </span>
+                                        <button id="selectAll" class="text-sm text-blue-600 hover:text-blue-800">Select All</button>
+                                        <button id="deselectAll" class="text-sm text-gray-600 hover:text-gray-800">Deselect All</button>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="bulkComplete" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm">
+                                            <i data-lucide="check" class="w-4 h-4 mr-1"></i>Complete
+                                        </button>
+                                        <button id="bulkDelete" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm">
+                                            <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete
+                                        </button>
+                                        <button id="bulkCancel" class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors text-sm">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFile" accept=".json" style="display: none;">
+    
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="shortcutsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate-bounce-in max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6 rounded-t-xl">
+                <h2 class="text-lg sm:text-xl font-bold text-white">Keyboard Shortcuts</h2>
+            </div>
+            <div class="p-4 sm:p-6">
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Add Task</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + N</kbd>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Search</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + F</kbd>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Toggle Dark Mode</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + D</kbd>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Export Tasks</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + E</kbd>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Import Tasks</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + I</kbd>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Clear Completed</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">Ctrl + Shift + C</kbd>
+                    </div>
+                </div>
+                <button id="closeShortcuts" class="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl mx-4 animate-bounce-in max-h-[90vh] overflow-y-auto relative">
+            <button id="closeAnalyticsTop" class="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors z-10" title="Close analytics">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6 rounded-t-xl">
+                <h2 class="text-lg sm:text-xl font-bold text-white">Task Analytics</h2>
+            </div>
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Tasks</h3>
+                        <p id="analyticsTotal" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Completion Rate</h3>
+                        <p id="analyticsCompletion" class="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">0%</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Tasks/Day</h3>
+                        <p id="analyticsDaily" class="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">0</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+                        <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Productivity Score</h3>
+                        <p id="analyticsScore" class="text-xl sm:text-2xl font-bold text-purple-600 dark:text-purple-400">0</p>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">Task Distribution</h3>
+                    <div id="categoryChart" class="h-48 sm:h-64 bg-gray-50 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                        <canvas id="categoryCanvas"></canvas>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Priority Breakdown</h3>
+                        <div class="flex items-center space-x-2">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">Low</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">Medium</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">High</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">Urgent</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-600">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Priority Distribution</h4>
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-gray-500"></i>
+                            </div>
+                            <div id="priorityChart" class="h-48 flex items-center justify-center">
+                                <canvas id="priorityCanvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 border border-green-200 dark:border-green-700/30">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">Low Priority</p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">Relaxed timeline</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p id="lowPriorityCount" class="text-lg font-bold text-green-600 dark:text-green-400">0</p>
+                                        <p id="lowPriorityPercent" class="text-xs text-gray-500">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-700/30">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mr-3">
+                                            <i data-lucide="clock" class="w-4 h-4 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">Medium Priority</p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">Standard timeline</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p id="mediumPriorityCount" class="text-lg font-bold text-yellow-600 dark:text-yellow-400">0</p>
+                                        <p id="mediumPriorityPercent" class="text-xs text-gray-500">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-lg p-4 border border-red-200 dark:border-red-700/30">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center mr-3">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">High Priority</p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">Accelerated timeline</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p id="highPriorityCount" class="text-lg font-bold text-red-600 dark:text-red-400">0</p>
+                                        <p id="highPriorityPercent" class="text-xs text-gray-500">0%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg p-4 border border-orange-200 dark:border-orange-700/30">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center mr-3">
+                                            <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">Urgent Priority</p>
+                                            <p class="text-xs text-gray-600 dark:text-gray-400">Immediate action needed</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p id="urgentPriorityCount" class="text-lg font-bold text-orange-600 dark:text-orange-400">0</p>
+                                        <p id="urgentPriorityPercent" class="text-xs text-gray-500">0%</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <button id="closeAnalytics" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    Close
+                </button>
             </div>
         </div>
-
-        <footer>
-            <a href="https://github.com/NtokozoMahlaela">Ntokozo Mahlaela @2025</a>
-        </footer>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="script.js"></script>
 </body>
 </html>
