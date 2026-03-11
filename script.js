@@ -338,17 +338,271 @@ function updateSearchResultsCounter(searchTerm) {
     }
 }
 
+// User Authentication System
+class UserAuth {
+    static USERS_KEY = 'taskflow_users';
+    static CURRENT_USER_KEY = 'taskflow_current_user';
+    
+    static hashPassword(password) {
+        // Simple hash for demo (in production, use proper hashing)
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+            const char = password.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        return hash.toString();
+    }
+    
+    static register(name, email, password) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
+        
+        // Check if email already exists
+        if (users.find(user => user.email === email)) {
+            return { success: false, message: 'Email already registered' };
+        }
+        
+        const newUser = {
+            id: Date.now().toString(),
+            name: name,
+            email: email,
+            password: this.hashPassword(password),
+            createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+        
+        return { success: true, user: newUser };
+    }
+    
+    static login(email, password) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
+        const user = users.find(u => u.email === email);
+        
+        if (!user) {
+            return { success: false, message: 'User not found' };
+        }
+        
+        if (user.password !== this.hashPassword(password)) {
+            return { success: false, message: 'Invalid password' };
+        }
+        
+        // Set current user
+        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
+        return { success: true, user: user };
+    }
+    
+    static logout() {
+        localStorage.removeItem(this.CURRENT_USER_KEY);
+    }
+    
+    static getCurrentUser() {
+        const user = localStorage.getItem(this.CURRENT_USER_KEY);
+        return user ? JSON.parse(user) : null;
+    }
+    
+    static isLoggedIn() {
+        return this.getCurrentUser() !== null;
+    }
+    
+    static updateUser(userData) {
+        const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
+        const index = users.findIndex(u => u.id === userData.id);
+        
+        if (index !== -1) {
+            users[index] = { ...users[index], ...userData };
+            localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+            
+            // Update current user if it's the same user
+            const currentUser = this.getCurrentUser();
+            if (currentUser && currentUser.id === userData.id) {
+                localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(users[index]));
+            }
+        }
+    }
+}
+
+// Task Storage for Users
+class UserTaskStorage {
+    static getTasks(userId) {
+        const tasks = JSON.parse(localStorage.getItem(`tasks_${userId}`) || '[]');
+        return tasks;
+    }
+    
+    static saveTasks(userId, tasks) {
+        localStorage.setItem(`tasks_${userId}`, JSON.stringify(tasks));
+    }
+    
+    static addTask(userId, task) {
+        const tasks = this.getTasks(userId);
+        tasks.push(task);
+        this.saveTasks(userId, tasks);
+    }
+    
+    static updateTask(userId, taskId, updates) {
+        const tasks = this.getTasks(userId);
+        const index = tasks.findIndex(t => t.id === taskId);
+        
+        if (index !== -1) {
+            tasks[index] = { ...tasks[index], ...updates };
+            this.saveTasks(userId, tasks);
+        }
+    }
+    
+    static deleteTask(userId, taskId) {
+        const tasks = this.getTasks(userId);
+        const filteredTasks = tasks.filter(t => t.id !== taskId);
+        this.saveTasks(userId, filteredTasks);
+    }
+}
+
+// Initialize app with authentication
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in
+    if (!UserAuth.isLoggedIn()) {
+        showAuthModal();
+    } else {
+        const user = UserAuth.getCurrentUser();
+        updateUserProfile(user);
+        initializeApp();
+    }
+    
+    // Auth event listeners
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+    document.getElementById('signupBtn').addEventListener('click', handleSignup);
+    document.getElementById('showSignup').addEventListener('click', showSignupForm);
+    document.getElementById('showLogin').addEventListener('click', showLoginForm);
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('profileBtn').addEventListener('click', toggleProfileDropdown);
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#profileBtn') && !e.target.closest('#profileDropdown')) {
+            document.getElementById('profileDropdown').classList.add('hidden');
+        }
+    });
+});
+
+function showAuthModal() {
+    document.getElementById('authModal').classList.remove('hidden');
+}
+
+function hideAuthModal() {
+    document.getElementById('authModal').classList.add('hidden');
+}
+
+function showSignupForm() {
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('signupForm').classList.remove('hidden');
+    document.getElementById('authTitle').textContent = 'Create Account';
+    document.getElementById('authSubtitle').textContent = 'Sign up to manage your tasks';
+}
+
+function showLoginForm() {
+    document.getElementById('signupForm').classList.add('hidden');
+    document.getElementById('loginForm').classList.remove('hidden');
+    document.getElementById('authTitle').textContent = 'Welcome Back';
+    document.getElementById('authSubtitle').textContent = 'Sign in to manage your tasks';
+}
+
+function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+    }
+    
+    const result = UserAuth.login(email, password);
+    
+    if (result.success) {
+        hideAuthModal();
+        updateUserProfile(result.user);
+        initializeApp();
+        showNotification(`Welcome back, ${result.user.name}!`, 'success');
+    } else {
+        showNotification(result.message, 'error');
+    }
+}
+
+function handleSignup() {
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    
+    if (!name || !email || !password) {
+        showNotification('Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showNotification('Password must be at least 6 characters', 'error');
+        return;
+    }
+    
+    const result = UserAuth.register(name, email, password);
+    
+    if (result.success) {
+        showNotification('Account created successfully! Please sign in.', 'success');
+        showLoginForm();
+        
+        // Clear signup form
+        document.getElementById('signupName').value = '';
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+    } else {
+        showNotification(result.message, 'error');
+    }
+}
+
+function handleLogout() {
+    UserAuth.logout();
+    showAuthModal();
+    showNotification('You have been logged out', 'info');
+    
+    // Clear app data
+    document.getElementById('taskList').innerHTML = '';
+    updateStatistics([]);
+}
+
+function updateUserProfile(user) {
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userInitial').textContent = user.name.charAt(0).toUpperCase();
+}
+
+function toggleProfileDropdown(e) {
+    e.stopPropagation();
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+function initializeApp() {
+    // Rest of the app initialization
+    lucide.createIcons();
+    initializeTheme();
+    initializeSortable();
+    initializeDatePicker();
+    initializeBackgrounds();
+    initializeKeyboardShortcuts();
+    initializeEventListeners();
+    loadTasks();
+    updateStatistics();
+}
+
+// Update task functions to use user-specific storage
 function getCurrentUserTasks() {
-    // Get tasks directly from localStorage without user authentication
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    return tasks;
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return [];
+    return UserTaskStorage.getTasks(currentUser.id);
 }
 
 function updateCurrentUserTasks(tasks) {
-    // Save tasks directly to localStorage without user authentication
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    // Add a new line here to log the updated tasks to the console
-    console.log('Updated tasks:', tasks);
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+    UserTaskStorage.saveTasks(currentUser.id, tasks);
 }
 
 function loadTasks() {
@@ -619,50 +873,51 @@ function createTaskElement(task) {
 }
 
 function toggleTaskComplete(id, completed) {
-    let tasks = getCurrentUserTasks();
-    const taskIndex = tasks.findIndex(task => task.id === id);
-    if (taskIndex !== -1) {
-        tasks[taskIndex].completed = completed;
-        updateCurrentUserTasks(tasks);
-        loadTasks();
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) {
+        showNotification('Please log in to update tasks', 'error');
+        return;
     }
-}
 
-function deleteTask(id) {
-    let tasks = getCurrentUserTasks();
-    tasks = tasks.filter(task => task.id !== id);
-    updateCurrentUserTasks(tasks);
+    UserTaskStorage.updateTask(currentUser.id, id, { completed });
     loadTasks();
 }
 
 function editTask(id) {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) {
+        showNotification('Please log in to edit tasks', 'error');
+        return;
+    }
+
     const task = getCurrentUserTasks().find(t => t.id === id);
     if (!task) return;
     
     const newText = prompt('Edit task title:', task.text);
     if (newText && newText.trim()) {
-        task.text = newText.trim();
-        updateCurrentUserTasks(getCurrentUserTasks());
+        UserTaskStorage.updateTask(currentUser.id, id, { text: newText.trim() });
         loadTasks();
         showNotification('Task updated successfully!', 'success');
     }
 }
 
 function updateTask(id, newText, newDescription, newDueDate, newPriority) {
-    let tasks = getCurrentUserTasks();
-    const taskIndex = tasks.findIndex(task => task.id === id);
-    
-    if (taskIndex !== -1) {
-        tasks[taskIndex].text = newText;
-        tasks[taskIndex].description = newDescription;
-        tasks[taskIndex].dueDate = newDueDate;
-        tasks[taskIndex].priority = newPriority;
-        updateCurrentUserTasks(tasks);
-        loadTasks();
-    }
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+
+    UserTaskStorage.updateTask(currentUser.id, id, {
+        text: newText,
+        description: newDescription,
+        dueDate: newDueDate,
+        priority: newPriority
+    });
+    loadTasks();
 }
 
 function addSubtask(taskId, text) {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+
     let tasks = getCurrentUserTasks();
     const taskIndex = tasks.findIndex(task => task.id === taskId);
     
@@ -676,39 +931,61 @@ function addSubtask(taskId, text) {
             completed: false
         });
         
-        updateCurrentUserTasks(tasks);
+        UserTaskStorage.saveTasks(currentUser.id, tasks);
         loadTasks();
     }
 }
 
 function toggleSubtaskComplete(taskId, subtaskIndex, completed) {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+
     let tasks = getCurrentUserTasks();
     const taskIndex = tasks.findIndex(task => task.id === taskId);
     
     if (taskIndex !== -1 && tasks[taskIndex].subtasks && tasks[taskIndex].subtasks[subtaskIndex]) {
         tasks[taskIndex].subtasks[subtaskIndex].completed = completed;
-        updateCurrentUserTasks(tasks);
+        UserTaskStorage.saveTasks(currentUser.id, tasks);
         loadTasks();
     }
 }
 
 function deleteSubtask(taskId, subtaskIndex) {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+
     let tasks = getCurrentUserTasks();
     const taskIndex = tasks.findIndex(task => task.id === taskId);
     
     if (taskIndex !== -1 && tasks[taskIndex].subtasks && tasks[taskIndex].subtasks[subtaskIndex]) {
         tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
-        updateCurrentUserTasks(tasks);
+        UserTaskStorage.saveTasks(currentUser.id, tasks);
         loadTasks();
     }
 }
 
 function filterTasks(filter) {
     const taskElements = document.querySelectorAll('.task-item');
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) return;
+    
+    const tasks = UserTaskStorage.getTasks(currentUser.id);
+    const now = new Date();
     
     taskElements.forEach(element => {
-        const isCompleted = element.dataset.completed === 'true';
-        const priority = element.dataset.priority;
+        const taskId = element.dataset.id;
+        const task = tasks.find(t => t.id === taskId);
+        
+        if (!task) {
+            element.style.display = 'none';
+            return;
+        }
+        
+        const isCompleted = task.completed;
+        const priority = task.priority;
+        const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+        const isOverdue = dueDate && dueDate < now && !task.completed;
+        const isToday = dueDate && dueDate.toDateString() === now.toDateString();
         
         let shouldShow = true;
         
@@ -720,7 +997,16 @@ function filterTasks(filter) {
                 shouldShow = isCompleted;
                 break;
             case 'high':
-                shouldShow = priority === 'high';
+                shouldShow = priority === 'high' || priority === 'urgent';
+                break;
+            case 'today':
+                shouldShow = isToday;
+                break;
+            case 'overdue':
+                shouldShow = isOverdue;
+                break;
+            default: // 'all'
+                shouldShow = true;
                 break;
         }
         
@@ -794,6 +1080,22 @@ function updateSearchResults(count, searchTerm) {
 }
 
 function updateStatistics(tasks) {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) {
+        // Clear statistics if no user logged in
+        document.getElementById('totalTasks').textContent = '0';
+        document.getElementById('completedTasks').textContent = '0';
+        document.getElementById('pendingTasks').textContent = '0';
+        document.getElementById('highPriorityTasks').textContent = '0';
+        document.getElementById('completionRate').textContent = '0%';
+        document.getElementById('overdueCount').textContent = '0';
+        document.getElementById('urgentCount').textContent = '0';
+        document.getElementById('totalChange').textContent = '+0';
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('progressPercentage').textContent = '0%';
+        return;
+    }
+
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(task => task.completed).length;
     const pendingTasks = totalTasks - completedTasks;
@@ -1856,6 +2158,12 @@ function duplicateTask(taskId) {
 
 // Enhanced addTask function
 function addTask() {
+    const currentUser = UserAuth.getCurrentUser();
+    if (!currentUser) {
+        showNotification('Please log in to add tasks', 'error');
+        return;
+    }
+
     const taskInput = document.getElementById('taskInput');
     const descriptionInput = document.getElementById('taskDescription');
     const dueDateInput = document.getElementById('dueDate');
@@ -1887,9 +2195,8 @@ function addTask() {
         complexity: analyzeTaskComplexity(taskInput.value.trim())
     };
 
-    let tasks = getCurrentUserTasks();
-    tasks.push(task);
-    updateCurrentUserTasks(tasks);
+    // Use user-specific storage
+    UserTaskStorage.addTask(currentUser.id, task);
 
     // Clear form
     clearTaskForm();
