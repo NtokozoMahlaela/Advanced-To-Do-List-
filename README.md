@@ -71,13 +71,6 @@ This application demonstrates:
 - **User-Centered Design**: Accessibility, responsive design
 - **Production-Ready Code**: Error handling, performance, security
 
-## 🚀 **Deployment**
-
-Deploy to any static hosting:
-- **Netlify/Vercel**: Zero-config deployment
-- **GitHub Pages**: Free hosting
-- **PWA Features**: Offline support, installable
-
 
 ---
 
