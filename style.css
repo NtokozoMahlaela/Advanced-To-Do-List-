@@ -22,13 +22,26 @@ body {
   color: var(--dark);
   min-height: 100vh;
   display: flex;
-  padding: 50px;
+  padding: 20px;
   flex-direction: column;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
   transition: background-image 0.5s ease;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  body {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 5px;
+  }
 }
 
 /* Search Highlight Styles */
